@@ -1,50 +1,63 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function LoginPage() {
-  const [userId, setUserId] = useState('');
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    alert(`Login clicked for: ${userId}`);
-    // You will connect this to backend in later steps
+    try {
+      const res = await axios.post('http://localhost:5000/api/login', {
+        username,
+        password,
+      });
+
+      if (res.data.role === 'admin') {
+        navigate('/admin');
+      } else if (res.data.role === 'border') {
+        navigate('/border');
+      } else {
+        setError('Unknown role');
+      }
+    } catch (err) {
+      setError('Invalid username or password');
+    }
   };
 
   return (
     <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card shadow-lg p-4 rounded-4">
-            <h3 className="text-center mb-4">Mess Login</h3>
-            <form onSubmit={handleLogin}>
-              <div className="mb-3">
-                <label htmlFor="userId" className="form-label">User ID</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="userId"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="mb-3">
-                <label htmlFor="password" className="form-label">Password</label>
-                <input
-                  type="password"
-                  className="form-control"
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-
-              <button type="submit" className="btn btn-primary w-100">Login</button>
-            </form>
+      <div className="card p-4 shadow rounded-4 col-md-6 mx-auto">
+        <h2 className="text-center mb-4">Mess Login</h2>
+        {error && <div className="alert alert-danger">{error}</div>}
+        <form onSubmit={handleLogin}>
+          <div className="mb-3">
+            <label className="form-label">Username:</label>
+            <input
+              type="text"
+              className="form-control"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+            />
           </div>
-        </div>
+          <div className="mb-3">
+            <label className="form-label">Password:</label>
+            <input
+              type="password"
+              className="form-control"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <div className="d-grid">
+            <button type="submit" className="btn btn-primary">Login</button>
+          </div>
+        </form>
       </div>
     </div>
   );
