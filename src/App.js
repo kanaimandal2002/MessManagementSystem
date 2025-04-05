@@ -1,10 +1,10 @@
 import React from 'react';
-import LoginPage from './pages/LoginPage';
+import BorderDashboard from './pages/BorderDashboard';
 
 function App() {
   return (
     <div>
-      <LoginPage />
+      <BorderDashboard />
     </div>
   );
 }
