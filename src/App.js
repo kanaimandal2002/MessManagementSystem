@@ -1,11 +1,19 @@
 import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
+import LoginPage from './pages/LoginPage';
+import BorderDashboard from './pages/BorderDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
-    <div>
-      <AdminDashboard />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/border" element={<BorderDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+      </Routes>
+    </Router>
   );
 }
 
