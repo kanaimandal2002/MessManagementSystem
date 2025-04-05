@@ -1,10 +1,10 @@
 import React from 'react';
-import BorderDashboard from './pages/BorderDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
     <div>
-      <BorderDashboard />
+      <AdminDashboard />
     </div>
   );
 }
