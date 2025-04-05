@@ -1,9 +1,10 @@
 import React from 'react';
+import LoginPage from './pages/LoginPage';
 
 function App() {
   return (
-    <div className="container mt-5">
-      <h2 className="text-center">Mess Management System</h2>
+    <div>
+      <LoginPage />
     </div>
   );
 }
