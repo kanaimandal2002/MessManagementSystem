@@ -13,6 +13,10 @@ function BorderDashboard() {
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
   const COLORS = ['#00C49F', '#FF8042']; // ON = green, OFF = orange
+  const [userInfo, setUserInfo] = useState({});
+  const [editMode, setEditMode] = useState(false);
+  const [newPhone, setNewPhone] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
 
 
@@ -21,7 +25,15 @@ function BorderDashboard() {
       navigate('/login');
     } else {
       const today = new Date().toISOString().split('T')[0];
-  
+      // Fetch user info
+      axios.get(`http://localhost:5000/api/user-info?username=${username}`)
+      .then(res => {
+        setUserInfo(res.data);
+        setNewPhone(res.data.phone); // for editing
+      })
+      .catch(err => console.error("Error fetching user info:", err));
+    
+
       axios.get(`http://localhost:5000/api/meal-status?username=${username}&date=${today}`)
         .then(res => {
           if (res.data && res.data.status) {
@@ -99,7 +111,47 @@ function BorderDashboard() {
         <>
           <p>Today's status: <strong>{status}</strong></p>
           <button onClick={() => handleToggle()}>Toggle Meal</button>
-  
+          
+          <h3>Your Info</h3>
+{!editMode ? (
+  <div>
+    <p><strong>Name:</strong> {userInfo.name}</p>
+    <p><strong>Username:</strong> {userInfo.username}</p>
+    <p><strong>Room:</strong> {userInfo.room}</p>
+    <p><strong>Phone:</strong> {userInfo.phone}</p>
+    <button onClick={() => setEditMode(true)}>Edit Info</button>
+  </div>
+) : (
+  <div>
+    <label>
+      New Phone:
+      <input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} />
+    </label>
+    <br />
+    <label>
+      New Password:
+      <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+    </label>
+    <br />
+    <button onClick={() => {
+      axios.post('http://localhost:5000/api/user-info', {
+        username,
+        phone: newPhone,
+        password: newPassword
+      }).then(() => {
+        alert('Info updated!');
+        setEditMode(false);
+        setUserInfo({ ...userInfo, phone: newPhone });
+      }).catch(err => {
+        console.error("Update failed:", err);
+        alert('Update failed!');
+      });
+    }}>Save</button>
+
+    <button onClick={() => setEditMode(false)}>Cancel</button>
+  </div>
+)}
+
           <h3>Meal History</h3>
           <ul>
           {history.map((entry, index) => (
