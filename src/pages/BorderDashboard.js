@@ -17,6 +17,7 @@ function BorderDashboard() {
   const [editMode, setEditMode] = useState(false);
   const [newPhone, setNewPhone] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [monthlyMeals, setMonthlyMeals] = useState(0);
 
 
 
@@ -33,6 +34,13 @@ function BorderDashboard() {
       })
       .catch(err => console.error("Error fetching user info:", err));
     
+      //veiw monthly meal
+      if (username) {
+        axios.get(`http://localhost:5000/api/monthly-meals?username=${username}`)
+          .then(res => setMonthlyMeals(res.data.mealCount))
+          .catch(err => console.error('Error fetching monthly meal count:', err));
+      }
+
 
       axios.get(`http://localhost:5000/api/meal-status?username=${username}&date=${today}`)
         .then(res => {
@@ -160,6 +168,11 @@ function BorderDashboard() {
             </li>
             ))}
            </ul>
+
+           <h3>📅 This Month</h3>
+<p>Total Meals Taken: {monthlyMeals}</p>
+
+
            <h3>Meal Summary (Last 30 Days)</h3>
 <ResponsiveContainer width="100%" height={300}>
   <PieChart>
