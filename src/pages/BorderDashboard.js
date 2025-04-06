@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import {
+  PieChart, Pie, Cell, Legend, Tooltip, ResponsiveContainer
+} from 'recharts';
+
 
 function BorderDashboard() {
   const navigate = useNavigate();
@@ -8,6 +12,8 @@ function BorderDashboard() {
   const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState([]);
+  const COLORS = ['#00C49F', '#FF8042']; // ON = green, OFF = orange
+
 
 
   useEffect(() => {
@@ -35,6 +41,19 @@ function BorderDashboard() {
     }
   }, [username, navigate]);
   
+  const getMealSummary = () => {
+    const summary = { ON: 0, OFF: 0 };
+  
+    history.forEach(entry => {
+      if (entry.status === 'ON') summary.ON++;
+      else if (entry.status === 'OFF') summary.OFF++;
+    });
+  
+    return [
+      { name: 'Meal ON', value: summary.ON },
+      { name: 'Meal OFF', value: summary.OFF }
+    ];
+  };
   
 
   const fetchTodayStatus = async () => {
@@ -89,6 +108,28 @@ function BorderDashboard() {
             </li>
             ))}
            </ul>
+           <h3>Meal Summary (Last 30 Days)</h3>
+<ResponsiveContainer width="100%" height={300}>
+  <PieChart>
+    <Pie
+      data={getMealSummary()}
+      dataKey="value"
+      nameKey="name"
+      cx="50%"
+      cy="50%"
+      outerRadius={100}
+      fill="#8884d8"
+      label
+    >
+      {getMealSummary().map((entry, index) => (
+        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+      ))}
+    </Pie>
+    <Tooltip />
+    <Legend />
+  </PieChart>
+</ResponsiveContainer>
+
        </>
       )}
     </div>
