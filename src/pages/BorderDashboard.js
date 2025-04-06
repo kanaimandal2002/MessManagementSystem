@@ -83,13 +83,13 @@ function BorderDashboard() {
   
           <h3>Meal History</h3>
           <ul>
-            {history.map((entry, index) => (
-              <li key={index}>
-                <strong>{entry.date}</strong>: {entry.status}
-              </li>
+          {history.map((entry, index) => (
+           <li key={index} style={{ color: entry.status === 'ON' ? 'green' : 'red' }}>
+              <strong>{entry.date}</strong>: {entry.status}
+            </li>
             ))}
-          </ul>
-        </>
+           </ul>
+       </>
       )}
     </div>
   );
