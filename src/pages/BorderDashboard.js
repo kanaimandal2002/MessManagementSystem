@@ -98,6 +98,23 @@ function BorderDashboard() {
         alert("Update failed!");
       });
   };
+  const handleUpdate = () => {
+    axios.post('http://localhost:5000/api/update-user-info', {
+      storedUsername,
+      updatedUsername,
+      updatedPassword,
+    })
+      .then(() => {
+        alert("Info updated successfully!");
+        localStorage.setItem("username", updatedUsername);
+        navigate('/border'); // 👈 make sure this matches your route
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Update failed!");
+      });
+  };
+  
 
   return (
     <div className="border-dashboard">
@@ -115,48 +132,39 @@ function BorderDashboard() {
           </button>
         </div>
 
-        {/* Edit Info */}
-        <div className="edit-card">
-          <h3>📝 Your Info</h3>
-          <div className="info-grid">
-            <div>
-              <label>Name:</label>
-              <input type="text" value={userInfo.name} readOnly />
-            </div>
-            <div>
-              <label>Address:</label>
-              <input type="text" value={userInfo.address} readOnly />
-            </div>
-            <div>
-              <label>Phone:</label>
-              <input type="text" value={userInfo.phone} readOnly />
-            </div>
-            <div>
-              <label>Room:</label>
-              <input type="text" value={userInfo.room} readOnly />
-            </div>
-            <div>
-              <label>Username:</label>
-              <input
-                type="text"
-                value={updatedUsername}
-                onChange={(e) => setUpdatedUsername(e.target.value)}
-              />
-            </div>
-            <div>
-              <label>Password:</label>
-              <input
-                type="password"
-                value={updatedPassword}
-                onChange={(e) => setUpdatedPassword(e.target.value)}
-                placeholder="Enter new password"
-              />
-            </div>
-          </div>
-          <button className="update-button" onClick={handleUpdateInfo}>
-            Update Info
-          </button>
-        </div>
+       {/* Edit Info */}
+<div className="edit-card">
+  <h3>📝 Your Info</h3>
+  <div className="info-grid">
+    <div>
+      <label>Name:</label>
+      <input type="text" value={userInfo.name} readOnly />
+    </div>
+    <div>
+      <label>Address:</label>
+      <input type="text" value={userInfo.address} readOnly />
+    </div>
+    <div>
+      <label>Phone:</label>
+      <input type="text" value={userInfo.phone} readOnly />
+    </div>
+    <div>
+      <label>Room:</label>
+      <input type="text" value={userInfo.room} readOnly />
+    </div>
+    <div>
+      <label>Username:</label>
+      <input type="text" value={userInfo.username} readOnly />
+    </div>
+  </div>
+  <button
+    className="update-button"
+    onClick={() => navigate('/edit-info')}
+  >
+    Edit Info
+  </button>
+</div>
+
 
         {/* Monthly Meals */}
         <div className="monthly-card">
