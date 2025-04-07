@@ -1,0 +1,91 @@
+.border-dashboard {
+    min-height: 100vh;
+    background-color: #f3f4f6;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .dashboard-container {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 700px;
+    width: 100%;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+  
+  .welcome {
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    color: #1f2937;
+  }
+  
+  .status-card,
+  .monthly-card,
+  .history-card {
+    background-color: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .status {
+    font-weight: bold;
+  }
+  
+  .status.on {
+    color: green;
+  }
+  
+  .status.off {
+    color: red;
+  }
+  
+  .toggle-button {
+    margin-top: 1rem;
+    padding: 0.5rem 1.25rem;
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .toggle-button:hover {
+    background-color: #1d4ed8;
+  }
+  
+  .history-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 1rem;
+    padding-right: 0.5rem;
+  }
+  
+  .history-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    font-size: 0.95rem;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  @media (max-width: 600px) {
+    .dashboard-container {
+      padding: 1rem;
+    }
+  
+    .welcome {
+      font-size: 1.5rem;
+    }
+  
+    .toggle-button {
+      width: 100%;
+    }
+  }
+  
