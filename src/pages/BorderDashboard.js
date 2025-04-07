@@ -5,79 +5,106 @@ import './BorderDashboard.css';
 
 function BorderDashboard() {
   const navigate = useNavigate();
-  const username = localStorage.getItem("username");
-  const [status, setStatus] = useState(null);
+  const storedUsername = localStorage.getItem("username");
+  const [currentUsername, setCurrentUsername] = useState(storedUsername);
+
+  const [status, setStatus] = useState("OFF"); // Default OFF
   const [history, setHistory] = useState([]);
   const [monthlyMeals, setMonthlyMeals] = useState(0);
 
-  const [userInfo, setUserInfo] = useState({ username: '', phone: '', room: '' });
+  const [userInfo, setUserInfo] = useState({
+    name: '',
+    address: '',
+    phone: '',
+    room: '',
+    username: '',
+  });
+  const [updatedUsername, setUpdatedUsername] = useState('');
+  const [updatedPassword, setUpdatedPassword] = useState('');
+
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
-    if (!username) {
+    if (!currentUsername) {
       navigate('/login');
     } else {
-      const today = new Date().toISOString().split('T')[0];
-
-      axios.get(`http://localhost:5000/api/meal-status?username=${username}&date=${today}`)
-        .then(res => setStatus(res.data.status || "OFF"))
+      // Meal Status for Today
+      axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${today}`)
+        .then(res => {
+          if (res.data.status === null || res.data.status === undefined) {
+            setStatus("OFF"); // No record for today: default to OFF
+          } else {
+            setStatus(res.data.status);
+          }
+        })
         .catch(err => {
           console.error("Error fetching status:", err);
-          setStatus("OFF");
+          setStatus("OFF"); // Still default OFF on error
         });
 
-      axios.get(`http://localhost:5000/api/meal-history?username=${username}`)
+      // Meal History
+      axios.get(`http://localhost:5000/api/meal-history?username=${currentUsername}`)
         .then(res => setHistory(res.data))
         .catch(err => console.error("Error fetching history:", err));
 
-      axios.get(`http://localhost:5000/api/monthly-meals?username=${username}`)
+      // Monthly Meals
+      axios.get(`http://localhost:5000/api/monthly-meals?username=${currentUsername}`)
         .then(res => setMonthlyMeals(res.data.mealCount))
         .catch(err => console.error("Error fetching monthly meals:", err));
 
-      axios.get(`http://localhost:5000/api/user-info?username=${username}`)
-        .then(res => setUserInfo(res.data))
+      // User Info
+      axios.get(`http://localhost:5000/api/user-info?username=${currentUsername}`)
+        .then(res => {
+          setUserInfo(res.data);
+          setUpdatedUsername(res.data.username);
+        })
         .catch(err => console.error("Error fetching user info:", err));
     }
-  }, [username, navigate]);
+  }, [currentUsername, navigate, today]);
 
   const handleToggle = () => {
     const today = new Date().toISOString().split('T')[0];
     const newStatus = status === "ON" ? "OFF" : "ON";
-
+  
     axios.post('http://localhost:5000/api/meal', {
-      username,
+      username: currentUsername,
       status: newStatus,
       date: today,
     })
-    .then(() => setStatus(newStatus))
-    .catch(err => console.error('Error updating status:', err));
+      .then(() => {
+        // 🔁 Immediately re-fetch from server to get accurate state
+        axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${today}`)
+          .then(res => setStatus(res.data.status || "OFF"))
+          .catch(err => console.error("Error re-fetching status:", err));
+      })
+      .catch(err => console.error('Error updating status:', err));
   };
-
-  const handleInfoChange = (e) => {
-    const { name, value } = e.target;
-    setUserInfo(prev => ({ ...prev, [name]: value }));
-  };
+  
 
   const handleUpdateInfo = () => {
     axios.post('http://localhost:5000/api/update-user-info', {
-      oldUsername: username,
-      ...userInfo
+      oldUsername: currentUsername,
+      newUsername: updatedUsername,
+      newPassword: updatedPassword,
     })
-    .then(res => {
-      alert("Update successful!");
-      localStorage.setItem("username", userInfo.username);
-    })
-    .catch(err => {
-      console.error(err);
-      alert("Update failed!");
-    });
+      .then(() => {
+        alert("Update successful!");
+        localStorage.setItem("username", updatedUsername);
+        setCurrentUsername(updatedUsername);
+        setUpdatedPassword(""); // Clear password field
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Update failed!");
+      });
   };
 
   return (
     <div className="border-dashboard">
       <div className="dashboard-container">
-        <h2 className="welcome">👋 Welcome, {username}</h2>
-  
-        {/* Status and Toggle */}
+        <h2 className="welcome">👋 Welcome, {currentUsername}</h2>
+
+        {/* Meal Status */}
         <div className="status-card">
           <p>
             Today's Meal Status:{" "}
@@ -87,42 +114,56 @@ function BorderDashboard() {
             Toggle Meal
           </button>
         </div>
-  
-        {/* ✨ Edit User Info (moved here) */}
+
+        {/* Edit Info */}
         <div className="edit-card">
-          <h3>📝Your Info</h3>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={userInfo.username}
-            onChange={handleInfoChange}
-          />
-          <input
-            type="text"
-            name="phone"
-            placeholder="Phone"
-            value={userInfo.phone}
-            onChange={handleInfoChange}
-          />
-          <input
-            type="text"
-            name="room"
-            placeholder="Room"
-            value={userInfo.room}
-            onChange={handleInfoChange}
-          />
+          <h3>📝 Your Info</h3>
+          <div className="info-grid">
+            <div>
+              <label>Name:</label>
+              <input type="text" value={userInfo.name} readOnly />
+            </div>
+            <div>
+              <label>Address:</label>
+              <input type="text" value={userInfo.address} readOnly />
+            </div>
+            <div>
+              <label>Phone:</label>
+              <input type="text" value={userInfo.phone} readOnly />
+            </div>
+            <div>
+              <label>Room:</label>
+              <input type="text" value={userInfo.room} readOnly />
+            </div>
+            <div>
+              <label>Username:</label>
+              <input
+                type="text"
+                value={updatedUsername}
+                onChange={(e) => setUpdatedUsername(e.target.value)}
+              />
+            </div>
+            <div>
+              <label>Password:</label>
+              <input
+                type="password"
+                value={updatedPassword}
+                onChange={(e) => setUpdatedPassword(e.target.value)}
+                placeholder="Enter new password"
+              />
+            </div>
+          </div>
           <button className="update-button" onClick={handleUpdateInfo}>
             Update Info
           </button>
         </div>
-  
-        {/* Monthly Meal Info */}
+
+        {/* Monthly Meals */}
         <div className="monthly-card">
           <h3>📅 This Month</h3>
           <p>Total Meals Taken: <strong>{monthlyMeals}</strong></p>
         </div>
-  
+
         {/* Meal History */}
         <div className="history-card">
           <h3>📖 Meal History</h3>
@@ -140,7 +181,6 @@ function BorderDashboard() {
       </div>
     </div>
   );
-  
 }
 
 export default BorderDashboard;
