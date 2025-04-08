@@ -1,0 +1,36 @@
+.admin-dashboard {
+    padding: 20px;
+    font-family: sans-serif;
+  }
+  
+  .table-container {
+    overflow-x: auto;
+  }
+  
+  .borders-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+  
+  .borders-table th,
+  .borders-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .borders-table th {
+    background-color: #f0f0f0;
+  }
+  
+  .on {
+    color: green;
+    font-weight: bold;
+  }
+  
+  .off {
+    color: red;
+    font-weight: bold;
+  }
+  

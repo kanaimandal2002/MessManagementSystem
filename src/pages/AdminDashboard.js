@@ -1,45 +1,60 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import './AdminDashboard.css'; // optional styling
 
-function AdminDashboard() {
-  const borders = [
-    { id: 1, name: 'John Doe', room: 'A-101', mealStatus: 'ON' },
-    { id: 2, name: 'Jane Smith', room: 'B-205', mealStatus: 'OFF' },
-    { id: 3, name: 'Rahul Kumar', room: 'C-303', mealStatus: 'ON' },
-  ];
+const AdminDashboard = () => {
+  const [borders, setBorders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchBorderStatus();
+  }, []);
+
+  const fetchBorderStatus = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/admin/border-meal-status');
+      setBorders(response.data);
+    } catch (error) {
+      console.error('Error fetching border status:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="container mt-5">
-      <div className="card shadow p-4 rounded-4">
-        <h3 className="mb-4 text-center">Admin Dashboard</h3>
+    <div className="admin-dashboard">
+      <h2>All Borders' Meal Status</h2>
 
-        <table className="table table-bordered table-striped">
-          <thead className="table-dark">
-            <tr>
-              <th>Border ID</th>
-              <th>Name</th>
-              <th>Room</th>
-              <th>Meal Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {borders.map((border) => (
-              <tr key={border.id}>
-                <td>{border.id}</td>
-                <td>{border.name}</td>
-                <td>{border.room}</td>
-                <td>{border.mealStatus}</td>
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <div className="table-container">
+          <table className="borders-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Room</th>
+                <th>Meal Status</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="text-end mt-4">
-          <button className="btn btn-primary me-2">Add Border</button>
-          <button className="btn btn-secondary">View Reports</button>
+            </thead>
+            <tbody>
+              {borders.map((border) => (
+                <tr key={border.id}>
+                  <td>{border.id}</td>
+                  <td>{border.name}</td>
+                  <td>{border.room}</td>
+                  <td className={border.status === 'ON' ? 'on' : 'off'}>
+                    {border.status}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
+      )}
     </div>
   );
-}
+};
 
 export default AdminDashboard;
