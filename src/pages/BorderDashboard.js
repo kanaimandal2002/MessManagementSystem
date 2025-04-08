@@ -7,8 +7,8 @@ function BorderDashboard() {
   const navigate = useNavigate();
   const storedUsername = localStorage.getItem("username");
   const [currentUsername, setCurrentUsername] = useState(storedUsername);
-  
-  const [status, setStatus] = useState(null); // 👈 null initially
+
+  const [status, setStatus] = useState(null);
   const [history, setHistory] = useState([]);
   const [monthlyMeals, setMonthlyMeals] = useState(0);
 
@@ -20,53 +20,57 @@ function BorderDashboard() {
     username: '',
   });
 
-  const [updatedUsername, setUpdatedUsername] = useState('');
-  const [updatedPassword, setUpdatedPassword] = useState('');
-
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     if (!currentUsername) {
       navigate('/login');
-    } else {
-      const today = new Date().toISOString().split('T')[0];
-
-      // ✅ Fetch today's meal status from the database
-      axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${today}`)
-        .then(res => {
-          if (res.data && res.data.status !== null) {
-            setStatus(res.data.status); // ✅ Use actual DB value
-          } else {
-            setStatus("OFF"); // Default if no entry exists
-          }
-        })
-        .catch(err => {
-          console.error("Error fetching status:", err);
-          setStatus("OFF");
-        });
-
-      // Meal History
-      axios.get(`http://localhost:5000/api/meal-history?username=${currentUsername}`)
-        .then(res => setHistory(res.data))
-        .catch(err => console.error("Error fetching history:", err));
-
-      // Monthly Meals
-      axios.get(`http://localhost:5000/api/monthly-meals?username=${currentUsername}`)
-        .then(res => setMonthlyMeals(res.data.mealCount))
-        .catch(err => console.error("Error fetching monthly meals:", err));
-
-      // User Info
-      axios.get(`http://localhost:5000/api/user-info?username=${currentUsername}`)
-        .then(res => {
-          setUserInfo(res.data);
-          setUpdatedUsername(res.data.username);
-        })
-        .catch(err => console.error("Error fetching user info:", err));
+      return;
     }
+
+    // Fetch today's meal status
+    axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${today}`)
+      .then(res => {
+        if (res.data && res.data.status !== null) {
+          setStatus(res.data.status);
+        } else {
+          setStatus("OFF");
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching status:", err);
+        setStatus("OFF");
+      });
+
+    // Fetch meal history
+    axios.get(`http://localhost:5000/api/meal-history?username=${currentUsername}`)
+      .then(res => setHistory(res.data))
+      .catch(err => console.error("Error fetching history:", err));
+
+    // Fetch monthly meals
+    axios.get(`http://localhost:5000/api/monthly-meals?username=${currentUsername}`)
+      .then(res => setMonthlyMeals(res.data.mealCount))
+      .catch(err => console.error("Error fetching monthly meals:", err));
+
+    // Fetch user info
+    axios.get(`http://localhost:5000/api/user-info?username=${currentUsername}`)
+      .then(res => {
+        if (res.data) {
+          setUserInfo({
+            name: res.data.name,
+            address: res.data.address,
+            phone: res.data.phone,
+            room: res.data.room,
+            username: res.data.username,
+          });
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching user info:", err);
+      });
   }, [currentUsername, navigate, today]);
 
   const handleToggle = () => {
-    const today = new Date().toISOString().split('T')[0];
     const newStatus = status === "ON" ? "OFF" : "ON";
 
     axios.post('http://localhost:5000/api/meal', {
@@ -75,6 +79,7 @@ function BorderDashboard() {
       date: today,
     })
       .then(() => {
+        // Re-fetch meal status after updating
         axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${today}`)
           .then(res => setStatus(res.data.status || "OFF"))
           .catch(err => console.error("Error re-fetching status:", err));
@@ -85,7 +90,7 @@ function BorderDashboard() {
   return (
     <div className="border-dashboard">
       <div className="dashboard-container">
-        <h2 className="welcome">👋 Welcome, {currentUsername}</h2>
+        <h2 className="welcome">👋 Welcome, {userInfo.name || currentUsername}</h2>
 
         {/* Meal Status */}
         <div className="status-card">
@@ -102,7 +107,7 @@ function BorderDashboard() {
           </button>
         </div>
 
-        {/* Edit Info */}
+        {/* Your Info Section */}
         <div className="edit-card">
           <h3>📝 Your Info</h3>
           <div className="info-grid">

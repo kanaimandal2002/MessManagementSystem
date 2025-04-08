@@ -10,12 +10,17 @@ function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     try {
       const res = await axios.post('http://localhost:5000/api/login', {
         username,
         password,
       });
 
+      // ✅ Save username in localStorage
+      localStorage.setItem('username', res.data.username);
+
+      // ✅ Navigate based on role
       if (res.data.role === 'admin') {
         navigate('/admin');
       } else if (res.data.role === 'border') {
@@ -24,6 +29,7 @@ function LoginPage() {
         setError('Unknown role');
       }
     } catch (err) {
+      console.error('Login error:', err);
       setError('Invalid username or password');
     }
   };
