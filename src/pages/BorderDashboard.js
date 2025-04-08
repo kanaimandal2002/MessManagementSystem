@@ -71,21 +71,26 @@ function BorderDashboard() {
   }, [currentUsername, navigate, today]);
 
   const handleToggle = () => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().split(' ')[0]; // e.g., "18:40:23"
     const newStatus = status === "ON" ? "OFF" : "ON";
-
+  
     axios.post('http://localhost:5000/api/meal', {
       username: currentUsername,
       status: newStatus,
       date: today,
+      time: currentTime
     })
       .then(() => {
-        // Re-fetch meal status after updating
         axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${today}`)
           .then(res => setStatus(res.data.status || "OFF"))
           .catch(err => console.error("Error re-fetching status:", err));
       })
       .catch(err => console.error('Error updating status:', err));
   };
+  
+  
 
   return (
     <div className="border-dashboard">
