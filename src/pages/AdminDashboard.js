@@ -6,6 +6,7 @@ const AdminDashboard = () => {
   const [borders, setBorders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalMeals, setTotalMeals] = useState(0);
+  const [snapshotTime, setSnapshotTime] = useState('');
 
   useEffect(() => {
     fetchBorderStatus();
@@ -18,9 +19,13 @@ const AdminDashboard = () => {
 
       setBorders(bordersData);
 
-      // Calculate total meals: Count how many have status === 'ON'
+      // Count number of borders who have status 'ON'
       const mealsCount = bordersData.filter(b => b.status === 'ON').length;
       setTotalMeals(mealsCount);
+
+      // Determine if snapshot is AM or PM
+      const currentHour = new Date().getHours();
+      setSnapshotTime(currentHour >= 18 ? 'PM Snapshot' : 'AM Snapshot');
 
     } catch (error) {
       console.error('Error fetching border status:', error);
@@ -37,6 +42,7 @@ const AdminDashboard = () => {
       <div className="total-meals-card">
         <h3>🍽️ Total Meals Today</h3>
         <p><strong>{totalMeals}</strong> meals taken</p>
+        <p className="snapshot-label">({snapshotTime})</p>
       </div>
 
       {/* Table */}
