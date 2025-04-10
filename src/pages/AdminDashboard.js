@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
   const [borders, setBorders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalMeals, setTotalMeals] = useState(0);
-  const [snapshotTime, setSnapshotTime] = useState('');
 
   useEffect(() => {
     fetchBorderStatus();
@@ -22,17 +23,37 @@ const AdminDashboard = () => {
       // Count number of borders who have status 'ON'
       const mealsCount = bordersData.filter(b => b.status === 'ON').length;
       setTotalMeals(mealsCount);
-
-      // Determine if snapshot is AM or PM
-      const currentHour = new Date().getHours();
-      setSnapshotTime(currentHour >= 18 ? 'PM Snapshot' : 'AM Snapshot');
-
     } catch (error) {
       console.error('Error fetching border status:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  const downloadExcel = () => {
+    const worksheetData = borders.map(b => ({
+      ID: b.id,
+      Name: b.name || 'N/A',
+      Room: b.room || 'N/A',
+      'Meal Status': b.status || 'OFF'
+    }));
+  
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Meal Status');
+  
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+    });
+  
+    const blob = new Blob([excelBuffer], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    });
+  
+    saveAs(blob, `MealStatus_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
+  
 
   return (
     <div className="admin-dashboard">
@@ -42,8 +63,13 @@ const AdminDashboard = () => {
       <div className="total-meals-card">
         <h3>🍽️ Total Meals Today</h3>
         <p><strong>{totalMeals}</strong> meals taken</p>
-        <p className="snapshot-label">({snapshotTime})</p>
+        <p className="snapshot-label">(Live Meal Status)</p>
       </div>
+      {/* Download Button */}
+      <div style={{ marginBottom: '1rem' }}>
+  <button onClick={downloadExcel}>📥 Download as Excel</button>
+</div>
+
 
       {/* Table */}
       <h3>🏠 All Borders' Meal Status</h3>
