@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -20,7 +19,6 @@ const AdminDashboard = () => {
 
       setBorders(bordersData);
 
-      // Count number of borders who have status 'ON'
       const mealsCount = bordersData.filter(b => b.status === 'ON').length;
       setTotalMeals(mealsCount);
     } catch (error) {
@@ -35,25 +33,17 @@ const AdminDashboard = () => {
       ID: b.id,
       Name: b.name || 'N/A',
       Room: b.room || 'N/A',
-      'Meal Status': b.status || 'OFF'
+      'Meal Status': b.status || 'OFF',
+      Date: b.date || 'N/A',
+      Time: b.time ? b.time.slice(0, 5) : 'N/A',
     }));
-  
+
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Meal Status');
-  
-    const excelBuffer = XLSX.write(workbook, {
-      bookType: 'xlsx',
-      type: 'array',
-    });
-  
-    const blob = new Blob([excelBuffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    });
-  
-    saveAs(blob, `MealStatus_${new Date().toISOString().slice(0, 10)}.xlsx`);
+
+    XLSX.writeFile(workbook, 'Admin_Meal_Status_Report.xlsx');
   };
-  
 
   return (
     <div className="admin-dashboard">
@@ -65,11 +55,11 @@ const AdminDashboard = () => {
         <p><strong>{totalMeals}</strong> meals taken</p>
         <p className="snapshot-label">(Live Meal Status)</p>
       </div>
+
       {/* Download Button */}
       <div style={{ marginBottom: '1rem' }}>
-  <button onClick={downloadExcel}>📥 Download as Excel</button>
-</div>
-
+        <button onClick={downloadExcel}>📥 Download as Excel</button>
+      </div>
 
       {/* Table */}
       <h3>🏠 All Borders' Meal Status</h3>
@@ -85,6 +75,8 @@ const AdminDashboard = () => {
                 <th>Name</th>
                 <th>Room</th>
                 <th>Meal Status</th>
+                <th>Date</th>
+                <th>Time</th>
               </tr>
             </thead>
             <tbody>
@@ -96,6 +88,8 @@ const AdminDashboard = () => {
                   <td className={border.status === 'ON' ? 'on' : 'off'}>
                     {border.status ? border.status.toUpperCase() : 'OFF'}
                   </td>
+                  <td>{border.date || 'N/A'}</td>
+                  <td>{border.time ? border.time.slice(0, 5) : 'N/A'}</td>
                 </tr>
               ))}
             </tbody>
