@@ -7,6 +7,8 @@ const AdminDashboard = () => {
   const [borders, setBorders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [totalMeals, setTotalMeals] = useState(0);
+  const [mealTakenMap, setMealTakenMap] = useState({});
+
 
   useEffect(() => {
     fetchBorderStatus();
@@ -21,11 +23,27 @@ const AdminDashboard = () => {
 
       const mealsCount = bordersData.filter(b => b.status === 'ON').length;
       setTotalMeals(mealsCount);
+
+      setMealTakenMap(
+        bordersData.reduce((acc, border) => {
+          acc[border.id] = false; // default all as not taken
+          return acc;
+        }, {})
+      );
+      
+
     } catch (error) {
       console.error('Error fetching border status:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleMealTaken = (id) => {
+    setMealTakenMap(prev => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
   const downloadExcel = () => {
@@ -37,6 +55,7 @@ const AdminDashboard = () => {
       Date: b.date || 'N/A',
       Time: b.time ? b.time.slice(0, 5) : 'N/A',
     }));
+    
 
     const worksheet = XLSX.utils.json_to_sheet(worksheetData);
     const workbook = XLSX.utils.book_new();
@@ -77,6 +96,7 @@ const AdminDashboard = () => {
                 <th>Meal Status</th>
                 <th>Date</th>
                 <th>Time</th>
+                <th>Meal Taken</th>
               </tr>
             </thead>
             <tbody>
@@ -91,6 +111,14 @@ const AdminDashboard = () => {
                   <td>{border.date ? new Date(border.date).toLocaleDateString() : 'N/A'}</td>
                 
                   <td>{border.time || 'N/A'}</td>
+                  <td>
+                  <button
+                  className={`mark-meal-btn ${mealTakenMap[border.id] ? 'taken' : 'not-taken'}`}
+                  onClick={() => toggleMealTaken(border.id)}
+                         >
+                  {mealTakenMap[border.id] ? '✅' : '❌'}
+                   </button>
+                  </td>
                 </tr>
               ))}
             </tbody>

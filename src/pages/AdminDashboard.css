@@ -33,5 +33,19 @@
     color: red;
     font-weight: bold;
   }
-
+  .mark-meal-btn {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+  }
+  
+  .mark-meal-btn.taken {
+    color: green;
+  }
+  
+  .mark-meal-btn.not-taken {
+    color: red;
+  }
+  
   
