@@ -108,7 +108,11 @@ const AdminDashboard = () => {
                   <td className={border.status === 'ON' ? 'on' : 'off'}>
                     {border.status ? border.status.toUpperCase() : 'OFF'}
                   </td>
-                  <td>{border.date ? new Date(border.date).toLocaleDateString() : 'N/A'}</td>
+                  <td>
+                  {border.date
+                    ? new Date(border.date).toLocaleDateString('en-GB') // DD/MM/YYYY
+                    : 'N/A'}
+                  </td>
                 
                   <td>{border.time || 'N/A'}</td>
                   <td>
