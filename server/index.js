@@ -28,50 +28,66 @@ db.connect((err) => {
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
 
-  db.query('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, results) => {
-    if (err) return res.status(500).json({ message: 'DB error' });
+  db.query(
+    'SELECT * FROM users WHERE username = ? AND password = ?',
+    [username, password],
+    (err, results) => {
+      if (err) return res.status(500).json({ message: 'DB error' });
 
-    if (results.length === 0) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      if (results.length === 0) {
+        return res.status(401).json({ message: 'Invalid credentials' });
+      }
+
+      res.json({
+        role: results[0].role,
+        username: results[0].username,
+        message: 'Login successful',
+      });
     }
-
-    res.json({ role: results[0].role, message: 'Login successful' });
-  });
+  );
 });
 
 // Toggle/Update Meal Status for TODAY
-app.post('/api/meal', (req, res) => {
+app.post('/api/meal', async (req, res) => {
   const { username, status, date } = req.body;
 
-  if (!username || !status || !date) {
-    return res.status(400).json({ message: 'Missing data' });
-  }
+  try {
+    const [userRows] = await db.promise().query('SELECT id FROM users WHERE username = ?', [username]);
 
-  db.query('SELECT id FROM users WHERE username = ?', [username], (err, results) => {
-    if (err || results.length === 0) {
-      return res.status(400).json({ message: 'User not found' });
+    if (userRows.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    const userId = results[0].id;
+    const userId = userRows[0].id;
+    const now = new Date();
+    const time = now.toTimeString().split(' ')[0];
 
-    const query = `
-      INSERT INTO meal_status (user_id, date, status)
-      VALUES (?, ?, ?)
-      ON DUPLICATE KEY UPDATE status = ?
-    `;
+    const [existingRows] = await db.promise().query(
+      'SELECT * FROM meal_status WHERE user_id = ? AND date = ?',
+      [userId, date]
+    );
 
-    db.query(query, [userId, date, status, status], (err2) => {
-      if (err2) {
-        console.error('DB insert/update error:', err2);
-        return res.status(500).json({ message: 'Failed to save status' });
-      }
+    if (existingRows.length > 0) {
+      await db.promise().query(
+        'UPDATE meal_status SET status = ?, time = ? WHERE user_id = ? AND date = ?',
+        [status, time, userId, date]
+      );
+    } else {
+      await db.promise().query(
+        'INSERT INTO meal_status (user_id, date, status, time) VALUES (?, ?, ?, ?)',
+        [userId, date, status, time]
+      );
+    }
 
-      res.json({ message: 'Meal status updated for today' });
-    });
-  });
+    res.status(200).json({ message: 'Meal status updated' });
+
+  } catch (err) {
+    console.error('Error updating meal status:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
-// Get today's meal status
+// Get today's or most recent meal status
 app.get('/api/meal-status', (req, res) => {
   const { username, date } = req.query;
 
@@ -79,24 +95,49 @@ app.get('/api/meal-status', (req, res) => {
     return res.status(400).json({ message: 'Missing data' });
   }
 
-  db.query('SELECT id FROM users WHERE username = ?', [username], (err, results) => {
-    if (err || results.length === 0) {
-      return res.status(400).json({ message: 'User not found' });
-    }
+  const getUserIdQuery = 'SELECT id FROM users WHERE username = ?';
+  db.query(getUserIdQuery, [username], (err, results) => {
+    if (err) return res.status(500).json({ message: 'Database error' });
+    if (results.length === 0) return res.status(400).json({ message: 'User not found' });
 
     const userId = results[0].id;
 
-    db.query('SELECT status FROM meal_status WHERE user_id = ? AND date = ?', [userId, date], (err2, results2) => {
-      if (err2) {
-        return res.status(500).json({ message: 'Database error' });
+    const todayStatusQuery = `
+      SELECT status
+      FROM meal_status
+      WHERE user_id = ? AND date = ?
+      ORDER BY time DESC
+      LIMIT 1
+    `;
+
+    db.query(todayStatusQuery, [userId, date], (err2, results2) => {
+      if (err2) return res.status(500).json({ message: 'Database error' });
+
+      if (results2.length > 0) {
+        return res.json({ status: results2[0].status });
       }
 
-      const status = results2.length > 0 ? results2[0].status : null;
-      res.json({ status });
+      // If no status for today, fetch most recent overall status
+      const fallbackQuery = `
+        SELECT status
+        FROM meal_status
+        WHERE user_id = ?
+        ORDER BY date DESC, time DESC
+        LIMIT 1
+      `;
+
+      db.query(fallbackQuery, [userId], (err3, fallbackResults) => {
+        if (err3) return res.status(500).json({ message: 'Database error' });
+
+        const status = fallbackResults.length > 0 ? fallbackResults[0].status : 'OFF';
+        res.json({ status });
+      });
     });
   });
 });
 
+
+// Get recent meal history
 // Get recent meal history
 app.get('/api/meal-history', (req, res) => {
   const { username } = req.query;
@@ -109,12 +150,16 @@ app.get('/api/meal-history', (req, res) => {
     const userId = results[0].id;
 
     const query = `
-      SELECT date, status
+      SELECT 
+        DATE_FORMAT(date, '%Y-%m-%d') AS date,
+        TIME_FORMAT(time, '%r') AS time,  -- AM/PM format
+        status
       FROM meal_status
       WHERE user_id = ?
-      ORDER BY date DESC
+      ORDER BY date DESC, time DESC
       LIMIT 30
     `;
+
     db.query(query, [userId], (err2, mealResults) => {
       if (err2) {
         return res.status(500).json({ message: 'Error fetching meal history' });
@@ -124,6 +169,8 @@ app.get('/api/meal-history', (req, res) => {
     });
   });
 });
+
+
 
 // Get current month's meal count
 app.get('/api/monthly-meals', (req, res) => {
@@ -194,6 +241,121 @@ app.post('/api/update-user-info', (req, res) => {
     res.json({ message: 'User info updated successfully' });
   });
 });
+
+// Admin: Get all borders and their latest meal status (any date)
+app.get('/api/admin/border-meal-status', (req, res) => {
+  const query = `
+    SELECT 
+      u.id,
+      u.name,
+      u.room,
+      ms.status,
+      DATE(ms.date) AS date,
+      DATE_FORMAT(ms.time, '%h:%i %p') AS time
+    FROM users u
+    LEFT JOIN (
+      SELECT ms1.*
+      FROM meal_status ms1
+      JOIN (
+        SELECT user_id, MAX(CONCAT(date, ' ', time)) AS max_datetime
+        FROM meal_status
+        GROUP BY user_id
+      ) ms2 
+      ON ms1.user_id = ms2.user_id AND CONCAT(ms1.date, ' ', ms1.time) = ms2.max_datetime
+    ) ms ON u.id = ms.user_id
+    WHERE u.role = 'border'
+    ORDER BY u.id;
+  `;
+
+  db.query(query, (err, results) => {
+    if (err) {
+      console.error('Error fetching border meal status:', err);
+      return res.status(500).json({ message: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+//guest meal status
+
+app.post('/api/guest-meal', async (req, res) => {
+  const { username, guest_name, status, date, time } = req.body;
+
+  if (!username || !guest_name || !status || !date || !time) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    // Get the user_id of the border
+    const [userRows] = await db.promise().query(
+      'SELECT id FROM users WHERE username = ?',
+      [username]
+    );
+
+    if (userRows.length === 0) {
+      return res.status(404).json({ message: 'Border not found' });
+    }
+
+    const userId = userRows[0].id;
+
+    // Check if a guest entry for the same guest and date already exists
+    const [existingRows] = await db.promise().query(
+      'SELECT id FROM guest_meals WHERE user_id = ? AND guest_name = ? AND date = ?',
+      [userId, guest_name, date]
+    );
+
+    if (existingRows.length > 0) {
+      // Update the existing record
+      await db.promise().query(
+        'UPDATE guest_meals SET status = ?, time = ? WHERE id = ?',
+        [status, time, existingRows[0].id]
+      );
+    } else {
+      // Insert new guest meal entry
+      await db.promise().query(
+        'INSERT INTO guest_meals (user_id, guest_name, status, date, time) VALUES (?, ?, ?, ?, ?)',
+        [userId, guest_name, status, date, time]
+      );
+    }
+
+    res.status(200).json({ message: 'Guest meal status saved/updated successfully' });
+  } catch (err) {
+    console.error("Error saving guest meal:", err);
+    res.status(500).json({ message: 'Server error while saving guest meal' });
+  }
+});
+
+
+
+
+//guest meal history
+app.get('/api/guest-meal-history', async (req, res) => {
+  const { username } = req.query;
+
+  try {
+    const [userResult] = await db.promise().query('SELECT id FROM users WHERE username = ?', [username]);
+
+    if (userResult.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const user_id = userResult[0].id;
+
+    const [history] = await db.promise().query(
+      'SELECT guest_name, status, date, time FROM guest_meals WHERE user_id = ? ORDER BY date DESC, time DESC',
+      [user_id]
+    );
+
+    res.status(200).json(history);
+
+  } catch (err) {
+    console.error('Error fetching guest meal history:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+
+
 
 // Start server
 app.listen(5000, () => {
