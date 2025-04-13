@@ -342,9 +342,17 @@ app.get('/api/guest-meal-history', async (req, res) => {
     const user_id = userResult[0].id;
 
     const [history] = await db.promise().query(
-      'SELECT guest_name, status, date, time FROM guest_meals WHERE user_id = ? ORDER BY date DESC, time DESC',
-      [user_id]
-    );
+        `SELECT 
+           guest_name, 
+           status, 
+           DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+           DATE_FORMAT(time, '%r') AS time
+         FROM guest_meals 
+         WHERE user_id = ? 
+         ORDER BY date DESC, time DESC`,
+        [user_id]
+      );
+      
 
     res.status(200).json(history);
 
