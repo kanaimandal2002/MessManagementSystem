@@ -362,6 +362,35 @@ app.get('/api/guest-meal-history', async (req, res) => {
   }
 });
 
+// Admin: Get all guest meals with border name
+app.get('/api/admin/guest-meal-status', async (req, res) => {
+  try {
+    const [results] = await db.promise().query(`
+      SELECT gm.id, u.name AS border_name, u.room, gm.guest_name, gm.status,
+             DATE_FORMAT(gm.date, '%Y-%m-%d') AS date,
+             DATE_FORMAT(STR_TO_DATE(gm.time, '%H:%i:%s'), '%h:%i %p') AS time
+      FROM guest_meals gm
+      JOIN users u ON gm.user_id = u.id
+      INNER JOIN (
+        SELECT guest_name, MAX(CONCAT(date, ' ', time)) AS max_datetime
+        FROM guest_meals
+        WHERE status = 'ON'
+        GROUP BY guest_name
+      ) latest
+      ON gm.guest_name = latest.guest_name
+         AND CONCAT(gm.date, ' ', gm.time) = latest.max_datetime
+      WHERE gm.status = 'ON'
+      ORDER BY gm.date DESC, gm.time DESC
+    `);
+    res.status(200).json(results);
+  } catch (err) {
+    console.error('Error fetching guest meal status:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
 
 
 
