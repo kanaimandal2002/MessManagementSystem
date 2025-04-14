@@ -374,12 +374,12 @@ app.get('/api/admin/guest-meal-status', async (req, res) => {
       INNER JOIN (
         SELECT guest_name, MAX(CONCAT(date, ' ', time)) AS max_datetime
         FROM guest_meals
-        WHERE status = 'ON'
+        WHERE date = CURDATE()
         GROUP BY guest_name
       ) latest
       ON gm.guest_name = latest.guest_name
          AND CONCAT(gm.date, ' ', gm.time) = latest.max_datetime
-      WHERE gm.status = 'ON'
+      WHERE gm.date = CURDATE()
       ORDER BY gm.date DESC, gm.time DESC
     `);
     res.status(200).json(results);
@@ -388,9 +388,18 @@ app.get('/api/admin/guest-meal-status', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
-
-
-
+//total guest meal count
+app.get('/api/admin/guest-meals-count', async (req, res) => {
+  try {
+    const [result] = await db.promise().query(
+      `SELECT COUNT(*) AS count FROM guest_meals WHERE status = 'ON'`
+    );
+    res.status(200).json({ count: result[0].count });
+  } catch (err) {
+    console.error('Error fetching guest meal count:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 
 

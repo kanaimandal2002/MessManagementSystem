@@ -10,10 +10,13 @@ const AdminDashboard = () => {
   const [totalMeals, setTotalMeals] = useState(0);
   const [mealTakenMap, setMealTakenMap] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [guestMealCount, setGuestMealCount] = useState(0);
+
 
   useEffect(() => {
     fetchBorderStatus();
     fetchGuestMeals();
+    fetchGuestMealCount();
   }, []);
 
   const fetchBorderStatus = async () => {
@@ -45,6 +48,15 @@ const AdminDashboard = () => {
       setGuestMeals(response.data);
     } catch (error) {
       console.error('Error fetching guest meals:', error);
+    }
+  };
+
+  const fetchGuestMealCount = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/api/admin/guest-meals-count');
+      setGuestMealCount(response.data.count);
+    } catch (error) {
+      console.error('Error fetching guest meal count:', error);
     }
   };
 
@@ -82,9 +94,14 @@ const AdminDashboard = () => {
         <p className="snapshot-label">(Live Meal Status)</p>
       </div>
 
-      <div style={{ marginBottom: '1rem' }}>
-        <button onClick={downloadExcel}>📥 Download as Excel</button>
-      </div>
+      {/* Total Guest Meals */}
+<div className="total-meals-card" style={{ backgroundColor: '#fff7e6' }}>
+  <h3>🧑‍🍳 Total Guest Meals (ON)</h3>
+  <p><strong>{guestMealCount}</strong> guest meals</p>
+  <p className="snapshot-label">(Currently ON)</p>
+</div>
+
+      {/*search bar*/}
 
       <div style={{ marginBottom: '1rem' }}>
         <input
@@ -152,6 +169,11 @@ const AdminDashboard = () => {
           </table>
         </div>
       )}
+
+      {/* Download Excel Button */}
+      <div style={{ marginBottom: '1rem' }}>
+        <button onClick={downloadExcel}>📥 Download as Excel</button>
+      </div>
 
       {/* Guest Meals Section */}
       <h3>👥 Guest Meal Status</h3>

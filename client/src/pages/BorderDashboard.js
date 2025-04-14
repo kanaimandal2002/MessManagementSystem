@@ -10,8 +10,7 @@ function BorderDashboard() {
 
   const [status, setStatus] = useState(null);
   const [history, setHistory] = useState([]);
-  const [monthlyMeals, setMonthlyMeals] = useState(0);
-
+  
   const [showGuestForm, setShowGuestForm] = useState(false);
   const [guestName, setGuestName] = useState('');
   const [guestStatus, setGuestStatus] = useState('ON');
@@ -57,9 +56,6 @@ function BorderDashboard() {
       .catch(err => console.error("Error fetching history:", err));
 
     // Fetch monthly meals
-    axios.get(`http://localhost:5000/api/monthly-meals?username=${currentUsername}`)
-      .then(res => setMonthlyMeals(res.data.mealCount))
-      .catch(err => console.error("Error fetching monthly meals:", err));
 
     // Fetch user info
     axios.get(`http://localhost:5000/api/user-info?username=${currentUsername}`)
@@ -308,10 +304,7 @@ const handleGuestStatusUpdate = async (e) => {
 </div>
 
         {/* Monthly Meals */}
-        <div className="monthly-card">
-          <h3>📅 This Month</h3>
-          <p>Total Meals Taken: <strong>{monthlyMeals}</strong></p>
-        </div>
+        
 
         {/* Meal History */}
 <div className="history-card">
