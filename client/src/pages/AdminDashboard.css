@@ -1,0 +1,127 @@
+.admin-dashboard {
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+}
+
+h2 {
+  text-align: center;
+  color: #343a40;
+  margin-bottom: 2rem;
+}
+
+.total-meals-card {
+  background-color: #ffffff;
+  padding: 1rem 2rem;
+  margin-bottom: 1rem;
+  border-left: 5px solid #28a745;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.total-meals-card h3 {
+  margin: 0;
+  color: #28a745;
+}
+
+.total-meals-card p {
+  margin: 0.2rem 0;
+  font-size: 1.1rem;
+}
+
+.snapshot-label {
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+input[type="text"] {
+  font-size: 1rem;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.borders-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+.borders-table th,
+.borders-table td {
+  border: 1px solid #dee2e6;
+  padding: 12px;
+  text-align: center;
+}
+
+.borders-table th {
+  background-color: #f1f1f1;
+  color: #333;
+  font-weight: bold;
+}
+
+.borders-table td {
+  color: #555;
+}
+
+.borders-table .on {
+  background-color: #d4edda;
+  color: #155724;
+  font-weight: bold;
+}
+
+.borders-table .off {
+  background-color: #f8d7da;
+  color: #721c24;
+  font-weight: bold;
+}
+
+.mark-meal-btn {
+  border: none;
+  font-size: 1.2rem;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.mark-meal-btn.taken {
+  background-color: #28a745;
+  color: white;
+}
+
+.mark-meal-btn.not-taken {
+  background-color: #dc3545;
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .borders-table th, .borders-table td {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  .admin-dashboard {
+    padding: 1rem;
+  }
+
+  button, input[type="text"] {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+}
+/* Add any additional styles here */
