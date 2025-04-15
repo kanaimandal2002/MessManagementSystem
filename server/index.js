@@ -402,6 +402,42 @@ app.get('/api/admin/guest-meals-count', async (req, res) => {
 });
 
 
+//total guest meal in month count
+app.get('/api/admin/guest-meals-monthly-count', async (req, res) => {
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT COUNT(*) AS total 
+      FROM guest_meals 
+      WHERE status = 'ON' AND MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())
+    `);
+    res.status(200).json({ total: rows[0].total });
+  } catch (err) {
+    console.error('Error fetching guest meal count:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Get all guest meal entries with status = 'ON' for the current month
+app.get('/api/admin/monthly-guest-meals', async (req, res) => {
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT gm.id, u.name AS border_name, gm.guest_name, gm.status, gm.date, gm.time
+      FROM guest_meals gm
+      JOIN users u ON gm.user_id = u.id
+      WHERE gm.status = 'ON' 
+        AND MONTH(gm.date) = MONTH(CURDATE()) 
+        AND YEAR(gm.date) = YEAR(CURDATE())
+      ORDER BY gm.date DESC, gm.time DESC
+    `);
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error('Error fetching monthly guest meals:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+
 
 // Start server
 app.listen(5000, () => {

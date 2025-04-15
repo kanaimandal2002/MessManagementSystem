@@ -11,13 +11,27 @@ const AdminDashboard = () => {
   const [mealTakenMap, setMealTakenMap] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [guestMealCount, setGuestMealCount] = useState(0);
+  const [monthlyGuestMeals, setMonthlyGuestMeals] = useState(0);
+  const [monthlyGuestMealsData, setMonthlyGuestMealsData] = useState([]);
+const [showGuestTable, setShowGuestTable] = useState(false);
 
 
   useEffect(() => {
     fetchBorderStatus();
     fetchGuestMeals();
     fetchGuestMealCount();
+    fetchMonthlyGuestMeals();
   }, []);
+
+  const fetchMonthlyGuestMealsData = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/monthly-guest-meals');
+      setMonthlyGuestMealsData(res.data);
+      setShowGuestTable(true); // Show table on button click
+    } catch (err) {
+      console.error('Error fetching monthly guest meal data:', err);
+    }
+  };
 
   const fetchBorderStatus = async () => {
     try {
@@ -57,6 +71,15 @@ const AdminDashboard = () => {
       setGuestMealCount(response.data.count);
     } catch (error) {
       console.error('Error fetching guest meal count:', error);
+    }
+  };
+
+  const fetchMonthlyGuestMeals = async () => {
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/guest-meals-monthly-count');
+      setMonthlyGuestMeals(res.data.total);
+    } catch (err) {
+      console.error('Error fetching monthly guest meals:', err);
     }
   };
 
@@ -100,6 +123,56 @@ const AdminDashboard = () => {
   <p><strong>{guestMealCount}</strong> guest meals</p>
   <p className="snapshot-label">(Currently ON)</p>
 </div>
+
+      {/* Total Guest Meals This Month */}
+<div className="total-guest-meals-card">
+  <h3>🧑‍🤝‍🧑 Total Guest Meals (This Month)</h3>
+  <p><strong>{monthlyGuestMeals}</strong> guest meals</p>
+</div>
+
+    {/* Button to show monthly guest meals table */}
+<div style={{ marginBottom: '1rem' }}>
+  <button onClick={fetchMonthlyGuestMealsData}>
+    📋 Show Monthly Guest Meal Records
+  </button>
+</div>
+
+{showGuestTable && (
+  <div className="table-container">
+    <h3>🧑‍🤝‍🧑 Monthly Guest Meal Records</h3>
+    <table className="borders-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Border Name</th>
+          <th>Guest Name</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {monthlyGuestMealsData.map((record) => (
+          <tr key={record.id}>
+            <td>{record.id}</td>
+            <td>{record.border_name}</td>
+            <td>{record.guest_name}</td>
+            <td>{record.status}</td>
+            <td>{new Date(record.date).toLocaleDateString('en-GB')}</td>
+            <td>{record.time ? new Date(`1970-01-01T${record.time}Z`).toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            }) : 'N/A'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
+  
+
 
       {/*search bar*/}
 
