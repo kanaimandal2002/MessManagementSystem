@@ -138,7 +138,6 @@ app.get('/api/meal-status', (req, res) => {
 
 
 // Get recent meal history
-// Get recent meal history
 app.get('/api/meal-history', (req, res) => {
   const { username } = req.query;
 
@@ -392,7 +391,7 @@ app.get('/api/admin/guest-meal-status', async (req, res) => {
 app.get('/api/admin/guest-meals-count', async (req, res) => {
   try {
     const [result] = await db.promise().query(
-      `SELECT COUNT(*) AS count FROM guest_meals WHERE status = 'ON'`
+      `SELECT COUNT(*) AS count FROM guest_meals WHERE date = CURDATE() AND status = 'ON'`
     );
     res.status(200).json({ count: result[0].count });
   } catch (err) {

@@ -24,14 +24,20 @@ const [showGuestTable, setShowGuestTable] = useState(false);
   }, []);
 
   const fetchMonthlyGuestMealsData = async () => {
+    if (showGuestTable) {
+      setShowGuestTable(false); // Hide the table if already showing
+      return;
+    }
+  
     try {
       const res = await axios.get('http://localhost:5000/api/admin/monthly-guest-meals');
       setMonthlyGuestMealsData(res.data);
-      setShowGuestTable(true); // Show table on button click
+      setShowGuestTable(true); // Show the table
     } catch (err) {
       console.error('Error fetching monthly guest meal data:', err);
     }
   };
+  
 
   const fetchBorderStatus = async () => {
     try {
@@ -119,7 +125,7 @@ const [showGuestTable, setShowGuestTable] = useState(false);
 
       {/* Total Guest Meals */}
 <div className="total-meals-card" style={{ backgroundColor: '#fff7e6' }}>
-  <h3>🧑‍🍳 Total Guest Meals (ON)</h3>
+  <h3>🧑‍🍳 Today's Guest Meals (ON)</h3>
   <p><strong>{guestMealCount}</strong> guest meals</p>
   <p className="snapshot-label">(Currently ON)</p>
 </div>
@@ -130,12 +136,14 @@ const [showGuestTable, setShowGuestTable] = useState(false);
   <p><strong>{monthlyGuestMeals}</strong> guest meals</p>
 </div>
 
-    {/* Button to show monthly guest meals table */}
-<div style={{ marginBottom: '1rem' }}>
+
+    {/*hide/show monthly guest meals table*/}
+    <div style={{ marginBottom: '1rem' }}>
   <button onClick={fetchMonthlyGuestMealsData}>
-    📋 Show Monthly Guest Meal Records
+    {showGuestTable ? '❌ Hide Monthly Guest Meal Records' : '📋 Show Monthly Guest Meal Records'}
   </button>
 </div>
+
 
 {showGuestTable && (
   <div className="table-container">
@@ -144,7 +152,7 @@ const [showGuestTable, setShowGuestTable] = useState(false);
       <thead>
         <tr>
           <th>ID</th>
-          <th>Border Name</th>
+          <th>Boarder Name</th>
           <th>Guest Name</th>
           <th>Status</th>
           <th>Date</th>
@@ -191,7 +199,7 @@ const [showGuestTable, setShowGuestTable] = useState(false);
         />
       </div>
 
-      <h3>🏠 All Borders' Meal Status</h3>
+      <h3>🏠 All Boarders' Meal Status</h3>
 
       {loading ? (
         <p>Loading...</p>
@@ -254,7 +262,7 @@ const [showGuestTable, setShowGuestTable] = useState(false);
         <table className="borders-table">
           <thead>
             <tr>
-              <th>Border Name</th>
+              <th>Boarder Name</th>
               <th>Room</th>
               <th>Guest Name</th>
               <th>Status</th>
