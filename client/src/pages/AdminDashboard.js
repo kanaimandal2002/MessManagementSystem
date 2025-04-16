@@ -13,7 +13,11 @@ const AdminDashboard = () => {
   const [guestMealCount, setGuestMealCount] = useState(0);
   const [monthlyGuestMeals, setMonthlyGuestMeals] = useState(0);
   const [monthlyGuestMealsData, setMonthlyGuestMealsData] = useState([]);
-const [showGuestTable, setShowGuestTable] = useState(false);
+  const [showGuestTable, setShowGuestTable] = useState(false);
+  const [guestMealSummary, setGuestMealSummary] = useState([]);
+  const [showGuestSummary, setShowGuestSummary] = useState(false);
+
+
 
 
   useEffect(() => {
@@ -113,6 +117,23 @@ const [showGuestTable, setShowGuestTable] = useState(false);
     XLSX.writeFile(workbook, 'Admin_Meal_Status_Report.xlsx');
   };
 
+  //guest meal per boarder summary
+  const fetchMonthlyGuestMealSummary = async () => {
+    if (showGuestSummary) {
+      setShowGuestSummary(false); // Toggle off
+      return;
+    }
+  
+    try {
+      const res = await axios.get('http://localhost:5000/api/admin/monthly-guest-meals-summary');
+      setGuestMealSummary(res.data);
+      setShowGuestSummary(true);
+    } catch (err) {
+      console.error('Error fetching guest meal summary:', err);
+    }
+  };
+  
+
   return (
     <div className="admin-dashboard">
       <h2>👨‍💼 Admin Dashboard</h2>
@@ -130,12 +151,7 @@ const [showGuestTable, setShowGuestTable] = useState(false);
   <p className="snapshot-label">(Currently ON)</p>
 </div>
 
-      {/* Total Guest Meals This Month */}
-<div className="total-guest-meals-card">
-  <h3>🧑‍🤝‍🧑 Total Guest Meals (This Month)</h3>
-  <p><strong>{monthlyGuestMeals}</strong> guest meals</p>
-</div>
-
+ 
 
     {/*hide/show monthly guest meals table*/}
     <div style={{ marginBottom: '1rem' }}>
@@ -286,6 +302,46 @@ const [showGuestTable, setShowGuestTable] = useState(false);
           </tbody>
         </table>
       </div>
+
+                 {/* Total Guest Meals This Month */}
+<div className="total-guest-meals-card">
+  <h3>🧑‍🤝‍🧑 Total Guest Meals (This Month)</h3>
+  <p><strong>{monthlyGuestMeals}</strong> guest meals</p>
+</div>
+
+            {/* Show Guest Meal Count Per Border */}
+<div style={{ marginBottom: '1rem' }}>
+  <button onClick={fetchMonthlyGuestMealSummary}>
+    {showGuestSummary ? '❌ Hide Guest Meal Count Per Border' : '📊 Show Guest Meal Count Per Border'}
+  </button>
+</div>
+            {/* Guest Meal Count Per Border Table */}
+         {showGuestSummary && (
+  <div className="table-container">
+    <h3>📆 Monthly Guest Meals Per Border</h3>
+    <table className="borders-table">
+      <thead>
+        <tr>
+          <th>Border Name</th>
+          <th>Room</th>
+          <th>Total Guest Meals</th>
+        </tr>
+      </thead>
+      <tbody>
+        {guestMealSummary.map((item, index) => (
+          <tr key={index}>
+            <td>{item.name}</td>
+            <td>{item.room}</td>
+            <td>{item.total_guest_meals}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
+
+
     </div>
   );
 };

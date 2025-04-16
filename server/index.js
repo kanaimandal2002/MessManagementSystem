@@ -435,6 +435,26 @@ app.get('/api/admin/monthly-guest-meals', async (req, res) => {
   }
 });
 
+// Route: GET /api/admin/monthly-guest-meals-summary each border
+
+app.get('/api/admin/monthly-guest-meals-summary', async (req, res) => {
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT u.name, u.room, gm.user_id, COUNT(*) AS total_guest_meals
+      FROM guest_meals gm
+      JOIN users u ON gm.user_id = u.id
+      WHERE MONTH(gm.date) = MONTH(CURRENT_DATE()) AND YEAR(gm.date) = YEAR(CURRENT_DATE())
+      GROUP BY gm.user_id
+    `);
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching monthly guest meal summary:', err);
+    res.status(500).json({ message: 'Server error fetching summary' });
+  }
+});
+
+
 
 
 
