@@ -1,5 +1,3 @@
-/* BorderDashboard.css */
-
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f4f7fa;
@@ -31,6 +29,7 @@ body {
   animation: fadeIn 0.8s ease-in;
 }
 
+/* Section Cards */
 .status-card,
 .edit-card,
 .history-card,
@@ -49,55 +48,76 @@ body {
 .history-card:hover,
 .guest-history-card:hover,
 .guest-status-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.01);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
+/* Status Colors */
 .status.on {
   background-color: #d4edda;
   color: #155724;
+  box-shadow: 0 0 10px 2px #28a74555;
 }
 
 .status.off {
   background-color: #f8d7da;
   color: #721c24;
+  box-shadow: 0 0 10px 2px #dc354555;
 }
 
-.toggle-button,
-.add-guest-btn,
-.guest-form-buttons button,
-.update-button,
-.guest-status-card button {
-  padding: 10px 16px;
-  margin: 8px 5px;
-  background: #28a745;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
-}
+/* Buttons */
 
-.guest-status-toggle button{
+.add-guest-btn{
   padding: 10px 16px;
   margin: 8px 5px;
+  font-size: 15px;
   background: #007bff;
   color: white;
   border: none;
   border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+.toggle-button,
+.set-guest-btn,
+.guest-form-buttons button,
+.update-button,
+.guest-status-card button {
+  padding: 10px 16px;
+  margin: 8px 5px;
+  font-size: 15px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.set-guest-btn {
+  background-color: #17a2b8;
+}
 
 .toggle-button:hover,
 .add-guest-btn:hover,
-.guest-status-toggle button:hover,
+.set-guest-btn:hover,
 .update-button:hover,
-.guest-form-buttons button:hover,
 .guest-status-card button:hover {
-  background: #218838;
+  background-color: #218838;
   transform: scale(1.05);
+}
+
+.set-guest-btn:hover {
+  background-color: #138496;
+}
+
+.toggle-button:active,
+.add-guest-btn:active,
+.set-guest-btn:active,
+.update-button:active,
+.guest-form-buttons button:active {
+  transform: scale(0.96);
 }
 
 .update-message {
@@ -107,6 +127,7 @@ body {
   animation: fadeIn 0.5s ease;
 }
 
+/* Popup */
 .guest-form-popup {
   position: fixed;
   top: 0;
@@ -118,6 +139,7 @@ body {
   justify-content: center;
   align-items: center;
   animation: fadeIn 0.3s ease-out;
+  z-index: 9999;
 }
 
 .guest-form-content {
@@ -127,6 +149,7 @@ body {
   width: 300px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: popupSlide 0.4s ease;
+  transform-origin: bottom;
 }
 
 .guest-form-content h4 {
@@ -149,10 +172,20 @@ body {
 }
 
 .guest-form-buttons {
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
   margin-top: 15px;
 }
 
+.guest-form-buttons button {
+  flex: 1;
+  padding: 10px;
+  font-size: 15px;
+  border-radius: 6px;
+}
+
+/* Guest Status */
 .guest-status-card form {
   display: flex;
   flex-direction: column;
@@ -169,6 +202,7 @@ body {
   border: 1px solid #ccc;
 }
 
+/* Info Grid */
 .info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -190,11 +224,13 @@ body {
   background: #f1f1f1;
 }
 
+/* Meal History */
 .history-list {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
+
 
 .history-item {
   display: flex;
@@ -204,13 +240,18 @@ body {
   padding: 10px 14px;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  transition: transform 0.3s ease;
+  animation: staggerIn 0.4s ease forwards;
+  opacity: 0;
 }
 
-.history-item:hover {
-  transform: scale(1.01);
-}
 
+.history-item:nth-child(1) { animation-delay: 0.1s; }
+.history-item:nth-child(2) { animation-delay: 0.2s; }
+.history-item:nth-child(3) { animation-delay: 0.3s; }
+.history-item:nth-child(4) { animation-delay: 0.4s; }
+.history-item:nth-child(5) { animation-delay: 0.5s; }
+
+/* Responsive */
 @media (max-width: 768px) {
   .info-grid {
     grid-template-columns: 1fr;
@@ -225,41 +266,15 @@ body {
   }
 }
 
+/* Button Row */
+.guest-button-row {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
 /* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideUp {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0px);
-    opacity: 1;
-  }
-}
-
-@keyframes popupSlide {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
-/* Add to or replace your existing BorderDashboard.css */
-
-/* Existing Animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -271,101 +286,82 @@ body {
 }
 
 @keyframes popupSlide {
-  from { transform: translateY(60px); opacity: 0; }
+  from { transform: translateY(40px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* NEW: Staggered Item Entry */
 @keyframes staggerIn {
-  0% { transform: translateY(20px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-/* NEW: Ripple Effect */
-.ripple-button {
+/*popup close button*/
+/* Modal Backdrop */
+.guest-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Modal Container */
+.guest-modal-container {
+  background-color: white;
+  padding: 2rem;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  animation: popupSlide 0.4s ease-out;
   position: relative;
-  overflow: hidden;
+  text-align: center;
 }
 
-.ripple-button::after {
-  content: "";
-  position: absolute;
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: 50%;
-  pointer-events: none;
-  width: 100px;
-  height: 100px;
-  transform: scale(0);
-  opacity: 0;
-  animation: rippleEffect 0.6s ease-out;
-}
-
-@keyframes rippleEffect {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-/* Button Click Interaction */
-.toggle-button:active,
-.add-guest-btn:active,
-.update-button:active,
-.guest-form-buttons button:active {
-  transform: scale(0.96);
-}
-
-/* Loader shimmer effect (if needed) */
-.shimmer-loader {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e2e2e2 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.2s infinite;
-  height: 16px;
+/* Guest Input Styling */
+.guest-name-input {
+  width: 100%;
+  padding: 10px;
+  margin: 15px 0;
+  font-size: 16px;
+  border: 1px solid #ccc;
   border-radius: 8px;
 }
 
-@keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+/* Guest Form Buttons */
+.guest-form-buttons button {
+  padding: 10px 16px;
+  margin: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  border: none;
+  transition: 0.3s ease;
 }
 
-/* Apply stagger effect to history items */
-.history-item {
-  animation: staggerIn 0.4s ease forwards;
-  opacity: 0;
+.guest-form-buttons button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
-.history-item:nth-child(1) { animation-delay: 0.1s; }
-.history-item:nth-child(2) { animation-delay: 0.2s; }
-.history-item:nth-child(3) { animation-delay: 0.3s; }
-.history-item:nth-child(4) { animation-delay: 0.4s; }
-.history-item:nth-child(5) { animation-delay: 0.5s; }
-/* Add more as needed or use JS for dynamic delays */
-
-/* Updated Guest Form Popup with slide-up */
-.guest-form-popup {
-  animation: fadeIn 0.3s ease-out;
+.guest-form-buttons .cancel-btn {
+  background-color: #dc3545;
+  color: white;
 }
 
-.guest-form-content {
-  animation: popupSlide 0.5s ease-out;
-  transform-origin: bottom;
+.guest-form-buttons button:not(.cancel-btn) {
+  background-color: #007bff;
+  color: white;
 }
 
-/* Optional hover bounce on cards */
-.status-card:hover,
-.edit-card:hover,
-.history-card:hover,
-.guest-history-card:hover,
-.guest-status-card:hover {
-  transform: translateY(-4px) scale(1.01);
-}
-
-/* Optional animated border glow on active cards */
-.status-card.on {
-  box-shadow: 0 0 10px 2px #28a74555;
-}
-
-.status-card.off {
-  box-shadow: 0 0 10px 2px #dc354555;
+/* Animation Reuse */
+@keyframes popupSlide {
+  from { transform: translateY(60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
