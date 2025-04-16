@@ -101,23 +101,28 @@ app.get('/api/meal-status', (req, res) => {
     if (results.length === 0) return res.status(400).json({ message: 'User not found' });
 
     const userId = results[0].id;
+    const now = new Date();
+    const isAfter6PM = now.getHours() >= 18;
+
+    const queryParams = [userId, date];
+    const timeCondition = isAfter6PM ? `AND TIME(time) <= '18:00:00'` : '';
 
     const todayStatusQuery = `
       SELECT status
       FROM meal_status
-      WHERE user_id = ? AND date = ?
+      WHERE user_id = ? AND date = ? ${timeCondition}
       ORDER BY time DESC
       LIMIT 1
     `;
 
-    db.query(todayStatusQuery, [userId, date], (err2, results2) => {
+    db.query(todayStatusQuery, queryParams, (err2, results2) => {
       if (err2) return res.status(500).json({ message: 'Database error' });
 
       if (results2.length > 0) {
         return res.json({ status: results2[0].status });
       }
 
-      // If no status for today, fetch most recent overall status
+      // If no suitable status for today, fallback to most recent overall
       const fallbackQuery = `
         SELECT status
         FROM meal_status
@@ -135,6 +140,7 @@ app.get('/api/meal-status', (req, res) => {
     });
   });
 });
+
 
 
 // Get recent meal history
@@ -387,6 +393,7 @@ app.get('/api/admin/guest-meal-status', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 //total guest meal count
 app.get('/api/admin/guest-meals-count', async (req, res) => {
   try {
