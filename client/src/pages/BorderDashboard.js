@@ -143,6 +143,11 @@ function BorderDashboard() {
   const handleGuestStatusUpdate = async (e) => {
     e.preventDefault();
 
+    if (!selectedGuest) {
+      alert("Please select a guest to update.");
+      return;
+    }
+
     const now = new Date();
     const hour = now.getHours();
 
@@ -236,10 +241,11 @@ function BorderDashboard() {
                 required
               >
                 <option value="">-- Select Guest --</option>
-                {guestHistory.map((guest, idx) => (
-                  <option key={idx} value={guest.guest_name}>
-                    {guest.guest_name}
-                  </option>
+                {[...new Set(guestHistory.map(guest => guest.guest_name))].map((name, idx) => (
+              <option 
+                  key={idx} value={name}>
+                  {name}
+               </option>
                 ))}
               </select>
             </div>
