@@ -111,6 +111,13 @@ function BorderDashboard() {
     }
 
     const now = new Date();
+    const hour = now.getHours();
+
+    if (hour >= 18) {
+      alert("❌ Unable to update guest meal status after 6:00 PM. Try again after 12:00 AM.");
+      return;
+    }
+
     const date = now.toISOString().split('T')[0];
     const time = now.toTimeString().split(' ')[0];
 
@@ -135,7 +142,15 @@ function BorderDashboard() {
 
   const handleGuestStatusUpdate = async (e) => {
     e.preventDefault();
+
     const now = new Date();
+    const hour = now.getHours();
+
+    if (hour >= 18) {
+      alert("❌ Unable to update guest meal status after 6:00 PM. Try again after 12:00 AM.");
+      return;
+    }
+
     const date = now.toISOString().split('T')[0];
     const time = now.toTimeString().split(' ')[0];
 

@@ -281,8 +281,8 @@ app.get('/api/admin/border-meal-status', (req, res) => {
   });
 });
 
-//guest meal status
 
+// guest meal status
 app.post('/api/guest-meal', async (req, res) => {
   const { username, guest_name, status, date, time } = req.body;
 
@@ -291,6 +291,12 @@ app.post('/api/guest-meal', async (req, res) => {
   }
 
   try {
+    // Restrict updates after 6 PM
+    const [hour, minute, second] = time.split(':').map(Number);
+    if (hour >= 18) {
+      return res.status(403).json({ message: 'Guest meal status cannot be updated after 6:00 PM. Try again after midnight.' });
+    }
+
     // Get the user_id of the border
     const [userRows] = await db.promise().query(
       'SELECT id FROM users WHERE username = ?',
@@ -329,6 +335,7 @@ app.post('/api/guest-meal', async (req, res) => {
     res.status(500).json({ message: 'Server error while saving guest meal' });
   }
 });
+
 
 
 
