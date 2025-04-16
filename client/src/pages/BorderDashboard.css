@@ -1,262 +1,371 @@
+/* BorderDashboard.css */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f7fa;
+  margin: 0;
+  padding: 0;
+}
+
 .border-dashboard {
-    min-height: 100vh;
-    background-color: #f3f4f6;
-    padding: 1.5rem;
-    display: flex;
-    justify-content: center;
+  display: flex;
+  justify-content: center;
+  padding: 30px 10px;
+  animation: fadeIn 1s ease-in;
+}
+
+.dashboard-container {
+  max-width: 900px;
+  width: 100%;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.6s ease-in-out;
+}
+
+.welcome {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+  animation: fadeIn 0.8s ease-in;
+}
+
+.status-card,
+.edit-card,
+.history-card,
+.guest-history-card,
+.guest-status-card {
+  margin-bottom: 30px;
+  padding: 20px;
+  border-radius: 10px;
+  background: #f9fafc;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.status-card:hover,
+.edit-card:hover,
+.history-card:hover,
+.guest-history-card:hover,
+.guest-status-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.status.on {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status.off {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.toggle-button,
+.add-guest-btn,
+.guest-form-buttons button,
+.update-button,
+.guest-status-card button {
+  padding: 10px 16px;
+  margin: 8px 5px;
+  background: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.guest-status-toggle button{
+  padding: 10px 16px;
+  margin: 8px 5px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+
+.toggle-button:hover,
+.add-guest-btn:hover,
+.guest-status-toggle button:hover,
+.update-button:hover,
+.guest-form-buttons button:hover,
+.guest-status-card button:hover {
+  background: #218838;
+  transform: scale(1.05);
+}
+
+.update-message {
+  margin-top: 10px;
+  color: red;
+  font-weight: bold;
+  animation: fadeIn 0.5s ease;
+}
+
+.guest-form-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.guest-form-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 300px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: popupSlide 0.4s ease;
+}
+
+.guest-form-content h4 {
+  margin-bottom: 15px;
+  text-align: center;
+  color: #333;
+}
+
+.guest-form-content label {
+  display: block;
+  margin: 10px 0 5px;
+}
+
+.guest-form-content input,
+.guest-form-content select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.guest-form-buttons {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.guest-status-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guest-status-card label {
+  font-weight: bold;
+}
+
+.guest-status-card select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.info-grid label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.info-grid input {
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background: #f1f1f1;
+}
+
+.history-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  background: #fff;
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease;
+}
+
+.history-item:hover {
+  transform: scale(1.01);
+}
+
+@media (max-width: 768px) {
+  .info-grid {
+    grid-template-columns: 1fr;
   }
-  
+
   .dashboard-container {
-    background-color: #ffffff;
-    border-radius: 1rem;
-    padding: 2rem;
-    max-width: 700px;
-    width: 100%;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  }
-  
-  .welcome {
-    font-size: 1.75rem;
-    font-weight: bold;
-    margin-bottom: 1.5rem;
-    color: #1f2937;
-  }
-  
-  .status-card,
-  .monthly-card,
-  .history-card {
-    background-color: #f9fafb;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.75rem;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .status {
-    font-weight: bold;
-  }
-  
-  .status.on {
-    color: green;
-  }
-  
-  .status.off {
-    color: red;
-  }
-  
-  .toggle-button {
-    margin-top: 1rem;
-    padding: 0.5rem 1.25rem;
-    background-color: #2563eb;
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s ease-in-out;
-  }
-  
-  .toggle-button:hover {
-    background-color: #1d4ed8;
-  }
-  
-  .history-list {
-    max-height: 250px;
-    overflow-y: auto;
-    margin-top: 1rem;
-    padding-right: 0.5rem;
-  }
-  
-  .history-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.4rem 0;
-    font-size: 0.95rem;
-    border-bottom: 1px solid #e5e7eb;
-  }
-  
-  @media (max-width: 600px) {
-    .dashboard-container {
-      padding: 1rem;
-    }
-  
-    .welcome {
-      font-size: 1.5rem;
-    }
-  
-    .toggle-button {
-      width: 100%;
-    }
-  }
-
-  .edit-card {
-    background-color: #fefce8;
-    border: 1px solid #fde68a;
-    border-radius: 0.75rem;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .edit-card input {
-    width: 100%;
-    padding: 0.5rem;
-    margin-top: 0.75rem;
-    border: 1px solid #d1d5db;
-    border-radius: 0.5rem;
-  }
-  
-  .update-button {
-    margin-top: 1rem;
-    padding: 0.5rem 1.25rem;
-    background-color: #10b981;
-    color: white;
-    border: none;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background-color 0.2s ease-in-out;
-  }
-  
-  .update-button:hover {
-    background-color: #059669;
-  }
-
-
-  
-  .guest-history-card {
-    background: #f9f9f9;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-top: 1.5rem;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
-  }
-  
-  .history-list {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .history-item {
-    display: flex;
-    justify-content: space-between;
-    border-bottom: 1px solid #eee;
-    padding: 0.5rem 0;
-  }
-
-
-
-  .add-guest-btn {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    margin-top: 1rem;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .guest-form-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  
-  .guest-form-content {
-    background: white;
     padding: 20px;
-    border-radius: 8px;
-    width: 300px;
-  }
-  
-  .guest-form-content h4 {
-    margin-top: 0;
-  }
-  
-  .guest-form-content input,
-  .guest-form-content select {
-    width: 100%;
-    padding: 8px;
-    margin-top: 5px;
-    margin-bottom: 15px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-  }
-  
-  .guest-form-buttons {
-    display: flex;
-    justify-content: space-between;
   }
 
-  .guest-form-buttons button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 4px;
-    cursor: pointer;
+  .guest-form-content {
+    width: 90%;
   }
-  
+}
 
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0px);
+    opacity: 1;
+  }
+}
 
-  .guest-status-card {
-    background-color: #ffffff;
-    border: 1px solid #ddd;
-    align-content: center;
-    padding: 20px 25px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    margin: 1.5rem 0;
-    max-width: 500px;
+@keyframes popupSlide {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
   }
-  
-  .guest-status-card h3 {
-    margin-bottom: 1rem;
-    color: #333;
-    font-size: 1.2rem;
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
-  
-  .guest-status-card .form-group {
-    margin-bottom: 15px;
+}
+
+/* Add to or replace your existing BorderDashboard.css */
+
+/* Existing Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes popupSlide {
+  from { transform: translateY(60px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* NEW: Staggered Item Entry */
+@keyframes staggerIn {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+/* NEW: Ripple Effect */
+.ripple-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.ripple-button::after {
+  content: "";
+  position: absolute;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  width: 100px;
+  height: 100px;
+  transform: scale(0);
+  opacity: 0;
+  animation: rippleEffect 0.6s ease-out;
+}
+
+@keyframes rippleEffect {
+  to {
+    transform: scale(4);
+    opacity: 0;
   }
-  
-  .guest-status-card label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 6px;
-    color: #444;
-  }
-  
-  .guest-status-card select {
-    width: 100%;
-    padding: 8px 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    background-color: #f8f8f8;
-    font-size: 0.95rem;
-  }
-  
-  .guest-status-card button[type="submit"] {
-    margin-top: 10px;
-    padding: 10px 16px;
-    background-color: #007bff;
-    color: #fff;
-    font-weight: bold;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-  }
-  
-  .guest-status-card button[type="submit"]:hover {
-    background-color: #0056b3;
-  }
-  
-  
+}
+
+/* Button Click Interaction */
+.toggle-button:active,
+.add-guest-btn:active,
+.update-button:active,
+.guest-form-buttons button:active {
+  transform: scale(0.96);
+}
+
+/* Loader shimmer effect (if needed) */
+.shimmer-loader {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e2e2e2 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  height: 16px;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Apply stagger effect to history items */
+.history-item {
+  animation: staggerIn 0.4s ease forwards;
+  opacity: 0;
+}
+
+.history-item:nth-child(1) { animation-delay: 0.1s; }
+.history-item:nth-child(2) { animation-delay: 0.2s; }
+.history-item:nth-child(3) { animation-delay: 0.3s; }
+.history-item:nth-child(4) { animation-delay: 0.4s; }
+.history-item:nth-child(5) { animation-delay: 0.5s; }
+/* Add more as needed or use JS for dynamic delays */
+
+/* Updated Guest Form Popup with slide-up */
+.guest-form-popup {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.guest-form-content {
+  animation: popupSlide 0.5s ease-out;
+  transform-origin: bottom;
+}
+
+/* Optional hover bounce on cards */
+.status-card:hover,
+.edit-card:hover,
+.history-card:hover,
+.guest-history-card:hover,
+.guest-status-card:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* Optional animated border glow on active cards */
+.status-card.on {
+  box-shadow: 0 0 10px 2px #28a74555;
+}
+
+.status-card.off {
+  box-shadow: 0 0 10px 2px #dc354555;
+}
