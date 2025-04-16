@@ -20,6 +20,9 @@ function BorderDashboard() {
   const [updateMessage, setUpdateMessage] = useState('');
   const [showUpdateError, setShowUpdateError] = useState(false);
 
+  const [showSetGuestStatusForm, setShowSetGuestStatusForm] = useState(false);
+
+
   const [userInfo, setUserInfo] = useState({
     name: '',
     address: '',
@@ -229,42 +232,52 @@ function BorderDashboard() {
           </div>
         )}
 
+        {/* Set Guest Meal Status Button */}
+<div className="guest-status-toggle">
+  <button onClick={() => setShowSetGuestStatusForm(!showSetGuestStatusForm)}>
+    🍽️ Set Guest Meal
+  </button>
+</div>
+
+
         {/* Set Guest Meal Status */}
-        <div className="guest-status-card">
-          <h3>🍽️ Set Guest Meal Status</h3>
-          <form onSubmit={handleGuestStatusUpdate}>
-            <div className="form-group">
-              <label>Guest Name:</label>
-              <select
-                value={selectedGuest}
-                onChange={(e) => setSelectedGuest(e.target.value)}
-                required
-              >
-                <option value="">-- Select Guest --</option>
-                {[...new Set(guestHistory.map(guest => guest.guest_name))].map((name, idx) => (
-              <option 
-                  key={idx} value={name}>
-                  {name}
-               </option>
-                ))}
-              </select>
-            </div>
+        {showSetGuestStatusForm && (
+  <div className="guest-status-card">
+    <h3>🍽️ Set Guest Meal Status</h3>
+    <form onSubmit={handleGuestStatusUpdate}>
+      <div className="form-group">
+        <label>Guest Name:</label>
+        <select
+          value={selectedGuest}
+          onChange={(e) => setSelectedGuest(e.target.value)}
+          required
+        >
+          <option value="">-- Select Guest --</option>
+          {[...new Set(guestHistory.map(guest => guest.guest_name))].map((name, idx) => (
+            <option key={idx} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </div>
 
-            <div className="form-group">
-              <label>Status:</label>
-              <select
-                value={selectedStatus}
-                onChange={(e) => setSelectedStatus(e.target.value)}
-                required
-              >
-                <option value="ON">ON</option>
-                <option value="OFF">OFF</option>
-              </select>
-            </div>
+      <div className="form-group">
+        <label>Status:</label>
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          required
+        >
+          <option value="ON">ON</option>
+          <option value="OFF">OFF</option>
+        </select>
+      </div>
 
-            <button type="submit">Set Status</button>
-          </form>
-        </div>
+      <button type="submit">Set Status</button>
+    </form>
+  </div>
+)}
+
 
         {/* Your Info Section */}
         <div className="edit-card">
