@@ -297,6 +297,22 @@ function BorderDashboard() {
               Edit Info
             </button>
           </div>
+
+
+          {/* Border Meal History */}
+          <div className="history-card">
+            <h3>📖 Meal History</h3>
+            <ul className="history-list">
+              {history.length > 0 ? history.map((entry, index) => (
+                <li key={index} className="history-item">
+                  <span>{entry.date} <small style={{ color: '#777' }}>{entry.time}</small></span>
+                  <span className={`status ${entry.status === 'ON' ? 'on' : 'off'}`}>
+                    {entry.status}
+                  </span>
+                </li>
+              )) : <p>No history found.</p>}
+            </ul>
+          </div>
     
           {/* Guest Meal History */}
           <div className="guest-history-card">
@@ -316,20 +332,7 @@ function BorderDashboard() {
             </ul>
           </div>
     
-          {/* Border Meal History */}
-          <div className="history-card">
-            <h3>📖 Meal History</h3>
-            <ul className="history-list">
-              {history.length > 0 ? history.map((entry, index) => (
-                <li key={index} className="history-item">
-                  <span>{entry.date} <small style={{ color: '#777' }}>{entry.time}</small></span>
-                  <span className={`status ${entry.status === 'ON' ? 'on' : 'off'}`}>
-                    {entry.status}
-                  </span>
-                </li>
-              )) : <p>No history found.</p>}
-            </ul>
-          </div>
+          
         </div>
       </div>
     );

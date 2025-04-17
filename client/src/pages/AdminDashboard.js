@@ -152,6 +152,8 @@ const AdminDashboard = () => {
       console.error('Error fetching guest meal summary:', err);
     }
   };
+
+  
   
 
   return (
@@ -203,8 +205,6 @@ const AdminDashboard = () => {
                 <th>Name</th>
                 <th>Room</th>
                 <th>Meal Status</th>
-                <th>Date</th>
-                <th>Time</th>
                 <th>Meal Taken</th>
               </tr>
             </thead>
@@ -221,12 +221,6 @@ const AdminDashboard = () => {
                     <td className={border.status === 'ON' ? 'on' : 'off'}>
                       {border.status ? border.status.toUpperCase() : 'OFF'}
                     </td>
-                    <td>
-                      {border.date
-                        ? new Date(border.date).toLocaleDateString('en-GB')
-                        : 'N/A'}
-                    </td>
-                    <td>{border.time || 'N/A'}</td>
                     <td>
                       <button
                         className={`mark-meal-btn ${mealTakenMap[border.id] ? 'taken' : 'not-taken'}`}
@@ -262,8 +256,6 @@ const AdminDashboard = () => {
               <th>Room</th>
               <th>Guest Name</th>
               <th>Status</th>
-              <th>Date</th>
-              <th>Time</th>
             </tr>
           </thead>
           <tbody>
@@ -275,8 +267,6 @@ const AdminDashboard = () => {
                 <td className={guest.status === 'ON' ? 'on' : 'off'}>
                   {guest.status}
                 </td>
-                <td>{guest.date}</td>
-                <td>{guest.time}</td>
               </tr>
             ))}
           </tbody>
@@ -364,8 +354,6 @@ const AdminDashboard = () => {
     </table>
   </div>
 )}
-
-
 
     </div>
   );
