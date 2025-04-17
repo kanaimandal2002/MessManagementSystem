@@ -101,7 +101,8 @@ const AdminDashboard = () => {
   };
 
   const downloadExcel = () => {
-    const worksheetData = borders.map(b => ({
+    // Sheet 1: Border Meal Status
+    const borderSheetData = borders.map(b => ({
       ID: b.id,
       Name: b.name || 'N/A',
       Room: b.room || 'N/A',
@@ -109,13 +110,32 @@ const AdminDashboard = () => {
       Date: b.date || 'N/A',
       Time: b.time ? b.time.slice(0, 5) : 'N/A',
     }));
-
-    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+  
+    // Sheet 2: Guest Meal Status
+    const guestSheetData = guestMeals.length > 0
+      ? guestMeals.map(g => ({
+          'Border Name': g.border_name || 'N/A',
+          Room: g.room || 'N/A',
+          'Guest Name': g.guest_name || 'N/A',
+          Status: g.status || 'OFF',
+          Date: g.date || 'N/A',
+          Time: g.time ? g.time.slice(0, 5) : 'N/A',
+        }))
+      : [{ Message: 'No guest meals for today.' }];
+  
+    // Create workbook and add sheets
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Meal Status');
-
+  
+    const borderSheet = XLSX.utils.json_to_sheet(borderSheetData);
+    XLSX.utils.book_append_sheet(workbook, borderSheet, 'Border Meal Status');
+  
+    const guestSheet = XLSX.utils.json_to_sheet(guestSheetData);
+    XLSX.utils.book_append_sheet(workbook, guestSheet, 'Guest Meal Status');
+  
+    // Export file
     XLSX.writeFile(workbook, 'Admin_Meal_Status_Report.xlsx');
   };
+  
 
   //guest meal per boarder summary
   const fetchMonthlyGuestMealSummary = async () => {
@@ -150,51 +170,6 @@ const AdminDashboard = () => {
   <p><strong>{guestMealCount}</strong> guest meals</p>
   <p className="snapshot-label">(Currently ON)</p>
 </div>
-
- 
-
-    {/*hide/show monthly guest meals table*/}
-    <div style={{ marginBottom: '1rem' }}>
-  <button onClick={fetchMonthlyGuestMealsData}>
-    {showGuestTable ? '❌ Hide Monthly Guest Meal Records' : '📋 Show Monthly Guest Meal Records'}
-  </button>
-</div>
-
-
-{showGuestTable && (
-  <div className="table-container">
-    <h3>🧑‍🤝‍🧑 Monthly Guest Meal Records</h3>
-    <table className="borders-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Boarder Name</th>
-          <th>Guest Name</th>
-          <th>Status</th>
-          <th>Date</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        {monthlyGuestMealsData.map((record) => (
-          <tr key={record.id}>
-            <td>{record.id}</td>
-            <td>{record.border_name}</td>
-            <td>{record.guest_name}</td>
-            <td>{record.status}</td>
-            <td>{new Date(record.date).toLocaleDateString('en-GB')}</td>
-            <td>{record.time ? new Date(`1970-01-01T${record.time}Z`).toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            }) : 'N/A'}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)}
-
   
 
 
@@ -274,6 +249,11 @@ const AdminDashboard = () => {
 
       {/* Guest Meals Section */}
       <h3>👥 Guest Meal Status</h3>
+      {guestMeals.length === 0 ? (
+  <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#777' }}>
+    No guest meals for today
+  </p>
+) : (
       <div className="table-container">
         <table className="borders-table">
           <thead>
@@ -302,12 +282,57 @@ const AdminDashboard = () => {
           </tbody>
         </table>
       </div>
+)}
 
                  {/* Total Guest Meals This Month */}
 <div className="total-guest-meals-card">
   <h3>🧑‍🤝‍🧑 Total Guest Meals (This Month)</h3>
   <p><strong>{monthlyGuestMeals}</strong> guest meals</p>
 </div>
+
+
+ {/*hide/show monthly guest meals table*/}
+ <div style={{ marginBottom: '1rem' }}>
+  <button onClick={fetchMonthlyGuestMealsData}>
+    {showGuestTable ? '❌ Hide Monthly Guest Meal Records' : '📋 Show Monthly Guest Meal Records'}
+  </button>
+</div>
+
+
+{showGuestTable && (
+  <div className="table-container">
+    <h3>🧑‍🤝‍🧑 Monthly Guest Meal Records</h3>
+    <table className="borders-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Boarder Name</th>
+          <th>Guest Name</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {monthlyGuestMealsData.map((record) => (
+          <tr key={record.id}>
+            <td>{record.id}</td>
+            <td>{record.border_name}</td>
+            <td>{record.guest_name}</td>
+            <td>{record.status}</td>
+            <td>{new Date(record.date).toLocaleDateString('en-GB')}</td>
+            <td>{record.time ? new Date(`1970-01-01T${record.time}Z`).toLocaleTimeString('en-US', {
+              hour: 'numeric',
+              minute: '2-digit',
+              hour12: true,
+            }) : 'N/A'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
 
             {/* Show Guest Meal Count Per Border */}
 <div style={{ marginBottom: '1rem' }}>

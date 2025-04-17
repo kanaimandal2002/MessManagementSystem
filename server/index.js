@@ -386,12 +386,12 @@ app.get('/api/admin/guest-meal-status', async (req, res) => {
       INNER JOIN (
         SELECT guest_name, MAX(CONCAT(date, ' ', time)) AS max_datetime
         FROM guest_meals
-        WHERE date = CURDATE()
+        WHERE date = CURDATE() - INTERVAL 1 DAY
         GROUP BY guest_name
       ) latest
       ON gm.guest_name = latest.guest_name
          AND CONCAT(gm.date, ' ', gm.time) = latest.max_datetime
-      WHERE gm.date = CURDATE()
+      WHERE gm.date = CURDATE() - INTERVAL 1 DAY
       ORDER BY gm.date DESC, gm.time DESC
     `);
     res.status(200).json(results);
