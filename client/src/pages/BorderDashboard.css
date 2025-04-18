@@ -100,7 +100,6 @@ body {
 }
 
 .toggle-button:hover,
-.add-guest-btn:hover,
 .set-guest-btn:hover,
 .update-button:hover,
 .guest-status-card button:hover {
@@ -351,7 +350,7 @@ body {
 }
 
 .guest-form-buttons .cancel-btn {
-  background-color: #dc3545;
+  background-color: #a59d9d;
   color: white;
 }
 

@@ -33,9 +33,9 @@ function EditInfo() {
   };
 
   return (
-    <div className="edit-info-container">
+    <div className="edit-info-section">
       <h2>🔒 Edit Username & Password</h2>
-
+  
       <div className="form-group">
         <label>New Username</label>
         <input
@@ -45,7 +45,7 @@ function EditInfo() {
           placeholder="Enter new username"
         />
       </div>
-
+  
       <div className="form-group">
         <label>New Password</label>
         <input
@@ -55,15 +55,18 @@ function EditInfo() {
           placeholder="Enter new password"
         />
       </div>
-
+  
       <div className="button-group">
-        <button onClick={handleUpdate} className="update-button">Update</button>
         <button onClick={() => navigate('/border')} className="cancel-button">
           Cancel
+        </button>
+        <button onClick={handleUpdate} className="update-button">
+          Update
         </button>
       </div>
     </div>
   );
+  
 }
 
 export default EditInfo;
