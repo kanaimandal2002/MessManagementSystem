@@ -415,26 +415,14 @@ app.get('/api/admin/guest-meals-count', async (req, res) => {
 });
 
 
-//total guest meal in month count
-app.get('/api/admin/guest-meals-monthly-count', async (req, res) => {
-  try {
-    const [rows] = await db.promise().query(`
-      SELECT COUNT(*) AS total 
-      FROM guest_meals 
-      WHERE status = 'ON' AND MONTH(date) = MONTH(CURDATE()) AND YEAR(date) = YEAR(CURDATE())
-    `);
-    res.status(200).json({ total: rows[0].total });
-  } catch (err) {
-    console.error('Error fetching guest meal count:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 
 // Get all guest meal entries with status = 'ON' for the current month
 app.get('/api/admin/monthly-guest-meals', async (req, res) => {
   try {
-    const [rows] = await db.promise().query(`
+    const selectedMonth = req.query.month; // format: YYYY-MM
+
+    let query = `
       SELECT 
         gm.id, 
         u.name AS border_name, 
@@ -444,18 +432,30 @@ app.get('/api/admin/monthly-guest-meals', async (req, res) => {
         DATE_FORMAT(gm.time, '%h:%i %p') AS time
       FROM guest_meals gm
       JOIN users u ON gm.user_id = u.id
-      WHERE gm.status = 'ON' 
-        AND MONTH(gm.date) = MONTH(CURDATE()) 
-        AND YEAR(gm.date) = YEAR(CURDATE())
-      ORDER BY gm.date DESC, gm.time DESC
-    `);
+      WHERE gm.status = 'ON'
+    `;
+    
+    let params = [];
 
+    if (selectedMonth) {
+      // Example: selectedMonth = "2025-04"
+      const [year, month] = selectedMonth.split('-');
+      query += ` AND YEAR(gm.date) = ? AND MONTH(gm.date) = ?`;
+      params.push(year, month);
+    } else {
+      query += ` AND YEAR(gm.date) = YEAR(CURDATE()) AND MONTH(gm.date) = MONTH(CURDATE())`;
+    }
+
+    query += ` ORDER BY gm.date DESC, gm.time DESC`;
+
+    const [rows] = await db.promise().query(query, params);
     res.status(200).json(rows);
   } catch (err) {
     console.error('Error fetching monthly guest meals:', err);
     res.status(500).json({ message: 'Server error' });
   }
 });
+
 
 // Route: GET /api/admin/monthly-guest-meals-count each border
 app.get('/api/admin/monthly-guest-meals-summary', async (req, res) => {
