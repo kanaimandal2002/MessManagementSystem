@@ -458,14 +458,24 @@ app.get('/api/admin/monthly-guest-meals', async (req, res) => {
 });
 
 // Route: GET /api/admin/monthly-guest-meals-count each border
-
 app.get('/api/admin/monthly-guest-meals-summary', async (req, res) => {
   try {
     const [rows] = await db.promise().query(`
-      SELECT u.name, u.room, gm.user_id, COUNT(*) AS total_guest_meals
+      SELECT 
+        u.name, 
+        u.room, 
+        gm.user_id, 
+        SUM(
+          CASE 
+            WHEN TIME(gm.time) < '06:00:00' THEN 2 
+            ELSE 1 
+          END
+        ) AS total_guest_meals
       FROM guest_meals gm
       JOIN users u ON gm.user_id = u.id
-      WHERE MONTH(gm.date) = MONTH(CURRENT_DATE()) AND YEAR(gm.date) = YEAR(CURRENT_DATE())
+      WHERE gm.status = 'ON'
+        AND MONTH(gm.date) = MONTH(CURDATE())
+        AND YEAR(gm.date) = YEAR(CURDATE())
       GROUP BY gm.user_id
     `);
 
@@ -475,6 +485,7 @@ app.get('/api/admin/monthly-guest-meals-summary', async (req, res) => {
     res.status(500).json({ message: 'Server error fetching summary' });
   }
 });
+
 
 
 

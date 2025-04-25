@@ -280,58 +280,16 @@ const AdminDashboard = () => {
   <p><strong>{monthlyGuestMeals}</strong> guest meals</p>
 </div>
 
-
-{/* Hide/Show Monthly Guest Meals Table */}
-<div style={{ marginBottom: '1rem' }}>
-  <button onClick={fetchMonthlyGuestMealsData}>
-    {showGuestTable ? '❌ Hide Monthly Guest Meal Records' : '📋 Show Monthly Guest Meal Records'}
-  </button>
-</div>
-
-{showGuestTable && (
-  <div className="table-container">
-    <h3>🧑‍🤝‍🧑 Monthly Guest Meal Records</h3>
-    <table className="borders-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Boarder Name</th>
-          <th>Guest Name</th>
-          <th>Status</th>
-          <th>Date</th>
-          <th>Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        {monthlyGuestMealsData.map((record) => (
-          <tr key={record.id}>
-            <td>{record.id}</td>
-            <td>{record.border_name}</td>
-            <td>{record.guest_name}</td>
-            <td>{record.status}</td>
-            <td>{new Date(record.date).toLocaleDateString('en-GB')}</td>
-
-            {/* ✅ Fix: Don't convert time with Date constructor */}
-            <td>{record.time || 'N/A'}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-)}
-
-
-
             {/* Show Guest Meal Count Per Border */}
-<div style={{ marginBottom: '1rem' }}>
+            <div style={{ marginBottom: '1rem' }}>
   <button onClick={fetchMonthlyGuestMealSummary}>
-    {showGuestSummary ? '❌ Hide Guest Meal Count Per Border' : '📊 Show Guest Meal Count Per Border'}
+    {showGuestSummary ? '❌ Hide Guest Meal Count Per Border' : '📊 Show Guest Meal Count Per Boarder'}
   </button>
 </div>
             {/* Guest Meal Count Per Border Table */}
          {showGuestSummary && (
   <div className="table-container">
-    <h3>📆 Monthly Guest Meals Per Border</h3>
+    <h3>📆 Monthly Guest Meals per Boarder</h3>
     <table className="borders-table">
       <thead>
         <tr>
@@ -352,6 +310,49 @@ const AdminDashboard = () => {
     </table>
   </div>
 )}
+
+
+{/* Hide/Show Monthly Guest Meals Table */}
+<div style={{ marginBottom: '1rem' }}>
+  <button onClick={fetchMonthlyGuestMealsData}>
+    {showGuestTable ? '❌ Hide Monthly Guest Meal Records' : '📋 Show Monthly Guest Meal Records'}
+  </button>
+</div>
+
+{showGuestTable && (
+  <div className="table-container">
+    <h3>🧑‍🤝‍🧑 Monthly Guest Meal Records</h3>
+    <h5>(Status = ON)</h5>
+    
+    <table className="borders-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Boarder Name</th>
+          <th>Guest Name</th>
+          <th>Date</th>
+          <th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        {monthlyGuestMealsData.map((record) => (
+          <tr key={record.id}>
+            <td>{record.id}</td>
+            <td>{record.border_name}</td>
+            <td>{record.guest_name}</td>
+            <td>{new Date(record.date).toLocaleDateString('en-GB')}</td>
+
+            {/* ✅ Fix: Don't convert time with Date constructor */}
+            <td>{record.time || 'N/A'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+)}
+
+
+
 
     </div>
   );

@@ -171,6 +171,10 @@ function BorderDashboard() {
         time
       });
       alert(`Meal status for ${selectedGuest} set to ${selectedStatus}`);
+      setShowSetGuestStatusForm(false);
+      setSelectedGuest('');
+      setSelectedStatus('ON');
+      setUpdateMessage("Guest meal status updated successfully!");
       const response = await axios.get(`http://localhost:5000/api/guest-meal-history?username=${currentUsername}`);
       setGuestHistory(response.data);
     } catch (err) {
