@@ -386,12 +386,12 @@ app.get('/api/admin/guest-meal-status', async (req, res) => {
       INNER JOIN (
         SELECT guest_name, MAX(CONCAT(date, ' ', time)) AS max_datetime
         FROM guest_meals
-        WHERE date = CURDATE() - INTERVAL 1 DAY
+        WHERE date = CURDATE() -- Only consider today's date
         GROUP BY guest_name
       ) latest
       ON gm.guest_name = latest.guest_name
          AND CONCAT(gm.date, ' ', gm.time) = latest.max_datetime
-      WHERE gm.date = CURDATE() - INTERVAL 1 DAY
+      WHERE gm.date = CURDATE() -- Only consider today's date
       ORDER BY gm.date DESC, gm.time DESC
     `);
     res.status(200).json(results);
@@ -430,11 +430,18 @@ app.get('/api/admin/guest-meals-monthly-count', async (req, res) => {
   }
 });
 
+
 // Get all guest meal entries with status = 'ON' for the current month
 app.get('/api/admin/monthly-guest-meals', async (req, res) => {
   try {
     const [rows] = await db.promise().query(`
-      SELECT gm.id, u.name AS border_name, gm.guest_name, gm.status, gm.date, gm.time
+      SELECT 
+        gm.id, 
+        u.name AS border_name, 
+        gm.guest_name, 
+        gm.status, 
+        gm.date, 
+        DATE_FORMAT(gm.time, '%h:%i %p') AS time
       FROM guest_meals gm
       JOIN users u ON gm.user_id = u.id
       WHERE gm.status = 'ON' 
@@ -442,6 +449,7 @@ app.get('/api/admin/monthly-guest-meals', async (req, res) => {
         AND YEAR(gm.date) = YEAR(CURDATE())
       ORDER BY gm.date DESC, gm.time DESC
     `);
+
     res.status(200).json(rows);
   } catch (err) {
     console.error('Error fetching monthly guest meals:', err);
@@ -449,7 +457,7 @@ app.get('/api/admin/monthly-guest-meals', async (req, res) => {
   }
 });
 
-// Route: GET /api/admin/monthly-guest-meals-summary each border
+// Route: GET /api/admin/monthly-guest-meals-count each border
 
 app.get('/api/admin/monthly-guest-meals-summary', async (req, res) => {
   try {

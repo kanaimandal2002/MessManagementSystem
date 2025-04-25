@@ -281,13 +281,12 @@ const AdminDashboard = () => {
 </div>
 
 
- {/*hide/show monthly guest meals table*/}
- <div style={{ marginBottom: '1rem' }}>
+{/* Hide/Show Monthly Guest Meals Table */}
+<div style={{ marginBottom: '1rem' }}>
   <button onClick={fetchMonthlyGuestMealsData}>
     {showGuestTable ? '❌ Hide Monthly Guest Meal Records' : '📋 Show Monthly Guest Meal Records'}
   </button>
 </div>
-
 
 {showGuestTable && (
   <div className="table-container">
@@ -311,17 +310,16 @@ const AdminDashboard = () => {
             <td>{record.guest_name}</td>
             <td>{record.status}</td>
             <td>{new Date(record.date).toLocaleDateString('en-GB')}</td>
-            <td>{record.time ? new Date(`1970-01-01T${record.time}Z`).toLocaleTimeString('en-US', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            }) : 'N/A'}</td>
+
+            {/* ✅ Fix: Don't convert time with Date constructor */}
+            <td>{record.time || 'N/A'}</td>
           </tr>
         ))}
       </tbody>
     </table>
   </div>
 )}
+
 
 
             {/* Show Guest Meal Count Per Border */}
