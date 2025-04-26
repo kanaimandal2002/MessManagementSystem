@@ -7,29 +7,26 @@ const AdminDashboard = () => {
   const [borders, setBorders] = useState([]);
   const [guestMeals, setGuestMeals] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [guestLoading, setGuestLoading] = useState(true);
   const [totalMeals, setTotalMeals] = useState(0);
   const [mealTakenMap, setMealTakenMap] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [guestMealCount, setGuestMealCount] = useState(0);
   const [monthlyGuestMealsData, setMonthlyGuestMealsData] = useState([]);
-  const [showGuestTable, setShowGuestTable] = useState(true);
+  const [showGuestTable, setShowGuestTable] = useState(false);
   const [guestMealSummary, setGuestMealSummary] = useState([]);
   const [showGuestSummary, setShowGuestSummary] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState('');
 
-  
-
   useEffect(() => {
     fetchBorderStatus();
     fetchGuestMeals();
-    fetchMonthlyGuestMealSummary();
   }, []);
 
   const fetchBorderStatus = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/admin/border-meal-status');
       const bordersData = response.data;
-
       setBorders(bordersData);
 
       const mealsCount = bordersData.filter(b => b.status === 'ON').length;
@@ -58,10 +55,13 @@ const AdminDashboard = () => {
       setGuestMealCount(count);
     } catch (error) {
       console.error('Error fetching guest meals:', error);
+    } finally {
+      setGuestLoading(false);
     }
   };
 
   const fetchMonthlyGuestMealsData = async (month) => {
+    if (!month) return;
     try {
       const res = await axios.get(`http://localhost:5000/api/admin/monthly-guest-meals`, {
         params: { month }
@@ -70,23 +70,16 @@ const AdminDashboard = () => {
       setShowGuestTable(true);
     } catch (err) {
       console.error('Error fetching monthly guest meal data:', err);
+      setMonthlyGuestMealsData([]);
+      setShowGuestTable(false);
     }
   };
-  const handleMonthChange = (e) => {
-    const selected = e.target.value;
-    setSelectedMonth(selected);
-    fetchMonthlyGuestMealsData(selected);
-  };
-  
-  
-  
 
   const fetchMonthlyGuestMealSummary = async () => {
     if (showGuestSummary) {
       setShowGuestSummary(false);
       return;
     }
-
     try {
       const res = await axios.get('http://localhost:5000/api/admin/monthly-guest-meals-summary');
       setGuestMealSummary(res.data);
@@ -94,6 +87,12 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error('Error fetching guest meal summary:', err);
     }
+  };
+
+  const handleMonthChange = (e) => {
+    const selected = e.target.value;
+    setSelectedMonth(selected);
+    fetchMonthlyGuestMealsData(selected);
   };
 
   const toggleMealTaken = (id) => {
@@ -160,11 +159,12 @@ const AdminDashboard = () => {
           }}
         />
       </div>
+      
 
       <h3>🏠 All Boarders' Meal Status</h3>
 
       {loading ? (
-        <p>Loading...</p>
+        <p>Loading Boarders...</p>
       ) : (
         <div className="table-container">
           <table className="borders-table">
@@ -206,11 +206,15 @@ const AdminDashboard = () => {
       )}
 
       <div style={{ marginBottom: '1rem' }}>
-        <button onClick={downloadExcel}>📥 Download as Excel</button>
+        <button onClick={downloadExcel} disabled={loading || guestLoading}>
+          📥 Download as Excel
+        </button>
       </div>
 
       <h3>🧑‍🤝‍🧑 Guest Meal Status</h3>
-      {guestMeals.length === 0 ? (
+      {guestLoading ? (
+        <p>Loading Guests...</p>
+      ) : guestMeals.length === 0 ? (
         <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#777' }}>
           No guest meals for today
         </p>
@@ -241,10 +245,17 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/*monthly guest meal count summary*/}
+      {/* Monthly Summary Button */}
+      <div style={{ margin: '1rem 0' }}>
+        <button onClick={fetchMonthlyGuestMealSummary}>
+          📊 {showGuestSummary ? 'Hide' : 'Show'} This Month's Guest Meals Summary
+        </button>
+      </div>
+
+      {/* Summary Table */}
       {showGuestSummary && (
         <div className="table-container">
-          <h3>📆 This Month Guest Meals</h3>
+          <h3>📆 This Month Guest Meals Summary</h3>
           <table className="borders-table">
             <thead>
               <tr>
@@ -266,47 +277,52 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Month Picker */}
+      <div style={{ margin: '1rem 0' }}>
+        <label htmlFor="monthPicker">📅 Select Month for Records:&nbsp;</label>
+        <input
+          id="monthPicker"
+          type="month"
+          value={selectedMonth}
+          onChange={handleMonthChange}
+          style={{ padding: '6px', borderRadius: '4px' }}
+        />
+      </div>
 
-
-      {/* Month Selector for Guest Meals */}
-<div style={{ marginBottom: '1rem' }}>
-  <label htmlFor="monthPicker">📅 Select Month:&nbsp;</label>
-  <input
-    id="monthPicker"
-    type="month"
-    value={selectedMonth}
-    onChange={handleMonthChange}
-    style={{ padding: '6px', borderRadius: '4px' }}
-  />
-</div>
-
-
+      {/* Monthly Guest Meal Records */}
       {showGuestTable && (
-        <div className="table-container">
-          <h3>🧑‍🤝‍🧑 Monthly Guest Meal Records</h3>
-          <h5>(Status = ON)</h5>
-          <table className="borders-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Boarder Name</th>
-                <th>Guest Name</th>
-                <th>Date</th>
-                <th>Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {monthlyGuestMealsData.map(record => (
-                <tr key={record.id}>
-                  <td>{record.id}</td>
-                  <td>{record.border_name}</td>
-                  <td>{record.guest_name}</td>
-                  <td>{new Date(record.date).toLocaleDateString('en-GB')}</td>
-                  <td>{record.time || 'N/A'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div>
+          <h3>🧑‍🤝‍🧑 Monthly Guest Meal Records (Status = ON)</h3>
+          {monthlyGuestMealsData.length === 0 ? (
+            <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#777' }}>
+              No guest meals for the selected month
+            </p>
+          ) : (
+            <div className="table-container">
+              <table className="borders-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Boarder Name</th>
+                    <th>Guest Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monthlyGuestMealsData.map(record => (
+                    <tr key={record.id}>
+                      <td>{record.id}</td>
+                      <td>{record.border_name}</td>
+                      <td>{record.guest_name}</td>
+                      <td>{new Date(record.date).toLocaleDateString('en-GB')}</td>
+                      <td>{record.time || 'N/A'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>
