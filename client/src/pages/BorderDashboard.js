@@ -79,109 +79,129 @@ function BorderDashboard() {
       .catch(err => console.error("Error fetching guest history:", err));
   }, [currentUsername, navigate, today]);
 
+
   const handleToggle = () => {
     const now = new Date();
     const currentHour = now.getHours();
-    const today = now.toISOString().split('T')[0];
+    let dateForStatus = new Date(now); // start with today
+  
+    // If between 12AM and 6AM, set date to tomorrow
+    if (currentHour >= 0 && currentHour < 6) {
+      dateForStatus.setDate(dateForStatus.getDate() + 1);
+    }
+  
+    const formattedDate = dateForStatus.toISOString().split('T')[0];
     const currentTime = now.toTimeString().split(' ')[0];
     const newStatus = status === "ON" ? "OFF" : "ON";
-
+  
+    // Prevent update after 6 PM
     if (currentHour >= 18) {
       setUpdateMessage("❌ Unable to update, please try again after 12:00 AM");
       setShowUpdateError(true);
       setTimeout(() => setShowUpdateError(false), 4000);
       return;
     }
-
+  
     axios.post('http://localhost:5000/api/meal', {
       username: currentUsername,
       status: newStatus,
-      date: today,
+      date: formattedDate,
       time: currentTime
     })
       .then(() => {
-        axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${today}`)
+        axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${formattedDate}`)
           .then(res => setStatus(res.data.status || "OFF"))
           .catch(err => console.error("Error re-fetching status:", err));
       })
       .catch(err => console.error('Error updating status:', err));
   };
+  
 
-  const handleGuestMealSubmit = () => {
-    if (!guestName.trim()) {
-      alert("Please enter guest name");
-      return;
-    }
+  const handleGuestMealSubmit = () => { 
+  if (!guestName.trim()) {
+    alert("Please enter guest name");
+    return;
+  }
 
-    const now = new Date();
-    const hour = now.getHours();
+  const now = new Date();
+  const hour = now.getHours();
 
-    if (hour >= 18) {
-      alert("❌ Unable to update guest meal status after 6:00 PM. Try again after 12:00 AM.");
-      return;
-    }
+  if (hour >= 18) {
+    alert("❌ Unable to update guest meal status after 6:00 PM. Try again after 12:00 AM.");
+    return;
+  }
 
-    const date = now.toISOString().split('T')[0];
-    const time = now.toTimeString().split(' ')[0];
+  // Adjust date if between 12AM and 6AM
+  let mealDate = new Date(now);
+  if (hour >= 0 && hour < 6) {
+    mealDate.setDate(mealDate.getDate() + 1);
+  }
 
-    axios.post('http://localhost:5000/api/guest-meal', {
-      username: currentUsername,
-      guest_name: guestName,
-      status: guestStatus,
-      date,
-      time
+  const date = mealDate.toISOString().split('T')[0];
+  const time = now.toTimeString().split(' ')[0];
+
+  axios.post('http://localhost:5000/api/guest-meal', {
+    username: currentUsername,
+    guest_name: guestName,
+    status: guestStatus,
+    date,
+    time
+  })
+    .then(() => {
+      alert("Guest meal added!");
+      setShowGuestForm(false);
+      setGuestName('');
+      setGuestStatus('ON');
     })
-      .then(() => {
-        alert("Guest meal added!");
-        setShowGuestForm(false);
-        setGuestName('');
-        setGuestStatus('ON');
-      })
-      .catch(err => {
-        console.error("Error adding guest meal:", err);
-        alert("Failed to add guest meal");
-      });
-  };
+    .catch(err => {
+      console.error("Error adding guest meal:", err);
+      alert("Failed to add guest meal");
+    });
+};
 
-  const handleGuestStatusUpdate = async (e) => {
-    e.preventDefault();
 
-    if (!selectedGuest) {
-      alert("Please select a guest to update.");
-      return;
-    }
+const handleGuestStatusUpdate = async (e) => {
+  e.preventDefault();
 
-    const now = new Date();
-    const hour = now.getHours();
+  if (!selectedGuest) {
+    alert("Please select a guest to update.");
+    return;
+  }
 
-    if (hour >= 18) {
-      alert("❌ Unable to update guest meal status after 6:00 PM. Try again after 12:00 AM.");
-      return;
-    }
+  const now = new Date();
 
-    const date = now.toISOString().split('T')[0];
-    const time = now.toTimeString().split(' ')[0];
+  // Format to local date and time
+  const localDate = now.toLocaleDateString('en-CA'); // YYYY-MM-DD
+  const localTime = now.toLocaleTimeString('en-GB', { hour12: false }); // HH:MM:SS
 
-    try {
-      await axios.post('http://localhost:5000/api/guest-meal', {
-        username: currentUsername,
-        guest_name: selectedGuest,
-        status: selectedStatus,
-        date,
-        time
-      });
-      alert(`Meal status for ${selectedGuest} set to ${selectedStatus}`);
-      setShowSetGuestStatusForm(false);
-      setSelectedGuest('');
-      setSelectedStatus('ON');
-      setUpdateMessage("Guest meal status updated successfully!");
-      const response = await axios.get(`http://localhost:5000/api/guest-meal-history?username=${currentUsername}`);
-      setGuestHistory(response.data);
-    } catch (err) {
-      console.error("Error updating guest status:", err);
-      alert("Failed to update guest meal status.");
-    }
-  };
+  const hour = now.getHours();
+
+  if (hour >= 18) {
+    alert("❌ Unable to update guest meal status after 6:00 PM. Try again after 12:00 AM.");
+    return;
+  }
+
+  try {
+    await axios.post('http://localhost:5000/api/guest-meal', {
+      username: currentUsername,
+      guest_name: selectedGuest,
+      status: selectedStatus,
+      date: localDate,   // ✅ formatted YYYY-MM-DD
+      time: localTime    // ✅ formatted HH:MM:SS
+    });
+    alert(`Meal status for ${selectedGuest} set to ${selectedStatus}`);
+    setShowSetGuestStatusForm(false);
+    setSelectedGuest('');
+    setSelectedStatus('ON');
+    setUpdateMessage("Guest meal status updated successfully!");
+
+    const response = await axios.get(`http://localhost:5000/api/guest-meal-history?username=${currentUsername}`);
+    setGuestHistory(response.data);
+  } catch (err) {
+    console.error("Error updating guest status:", err);
+    alert("Failed to update guest meal status.");
+  }
+};
 
   return (
   

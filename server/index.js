@@ -108,12 +108,18 @@ app.get('/api/meal-status', (req, res) => {
     const timeCondition = isAfter6PM ? `AND TIME(time) <= '18:00:00'` : '';
 
     const todayStatusQuery = `
-      SELECT status
-      FROM meal_status
-      WHERE user_id = ? AND date = ? ${timeCondition}
-      ORDER BY time DESC
-      LIMIT 1
-    `;
+  SELECT status
+  FROM meal_status
+  WHERE user_id = ? AND date = 
+    CASE 
+      WHEN TIME(NOW()) BETWEEN '00:00:00' AND '06:00:00' 
+      THEN DATE(DATE_ADD(CURDATE(), INTERVAL 1 DAY))
+      ELSE DATE(CURDATE())
+    END
+  ${timeCondition}
+  ORDER BY time DESC
+  LIMIT 1
+`;
 
     db.query(todayStatusQuery, queryParams, (err2, results2) => {
       if (err2) return res.status(500).json({ message: 'Database error' });
@@ -292,7 +298,7 @@ app.post('/api/guest-meal', async (req, res) => {
 
   try {
     // Restrict updates after 6 PM
-    const [hour, minute, second] = time.split(':').map(Number);
+    const [hour] = time.split(':').map(Number);
     if (hour >= 18) {
       return res.status(403).json({ message: 'Guest meal status cannot be updated after 6:00 PM. Try again after midnight.' });
     }
@@ -325,7 +331,7 @@ app.post('/api/guest-meal', async (req, res) => {
       // Insert new guest meal entry
       await db.promise().query(
         'INSERT INTO guest_meals (user_id, guest_name, status, date, time) VALUES (?, ?, ?, ?, ?)',
-        [userId, guest_name, status, CURRENT_DATE, time]
+        [userId, guest_name, status, date, time]  // ✅ FIXED: Use `date` from req.body
       );
     }
 
@@ -335,6 +341,7 @@ app.post('/api/guest-meal', async (req, res) => {
     res.status(500).json({ message: 'Server error while saving guest meal' });
   }
 });
+
 
 
 
