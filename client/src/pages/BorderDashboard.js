@@ -22,6 +22,7 @@ function BorderDashboard() {
 
   const [showSetGuestStatusForm, setShowSetGuestStatusForm] = useState(false);
 
+
   const [userInfo, setUserInfo] = useState({
     name: '',
     address: '',
@@ -32,16 +33,7 @@ function BorderDashboard() {
 
   const [guestHistory, setGuestHistory] = useState([]);
 
-  // Get current date in IST
-  const getCurrentISTDate = () => {
-    const now = new Date();
-    const utcOffset = now.getTimezoneOffset() * 60000;
-    const istOffset = 5.5 * 60 * 60000;
-    const istTime = new Date(now.getTime() + istOffset + utcOffset);
-    return istTime.toISOString().split('T')[0];
-  };
-
-  const today = getCurrentISTDate();
+  const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     if (!currentUsername) {
@@ -87,22 +79,14 @@ function BorderDashboard() {
       .catch(err => console.error("Error fetching guest history:", err));
   }, [currentUsername, navigate, today]);
 
-  const getISTDateTime = () => {
-    const now = new Date();
-    const utcOffset = now.getTimezoneOffset() * 60000;
-    const istOffset = 5.5 * 60 * 60000;
-    const istTime = new Date(now.getTime() + istOffset + utcOffset);
-    const date = istTime.toISOString().split('T')[0];
-    const time = istTime.toTimeString().split(' ')[0];
-    const hour = istTime.getHours();
-    return { date, time, hour };
-  };
-
   const handleToggle = () => {
-    const { date, time, hour } = getISTDateTime();
+    const now = new Date();
+    const currentHour = now.getHours();
+    const today = now.toISOString().split('T')[0];
+    const currentTime = now.toTimeString().split(' ')[0];
     const newStatus = status === "ON" ? "OFF" : "ON";
 
-    if (hour >= 18) {
+    if (currentHour >= 18) {
       setUpdateMessage("❌ Unable to update, please try again after 12:00 AM");
       setShowUpdateError(true);
       setTimeout(() => setShowUpdateError(false), 4000);
@@ -112,11 +96,11 @@ function BorderDashboard() {
     axios.post('http://localhost:5000/api/meal', {
       username: currentUsername,
       status: newStatus,
-      date,
-      time
+      date: today,
+      time: currentTime
     })
       .then(() => {
-        axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${date}`)
+        axios.get(`http://localhost:5000/api/meal-status?username=${currentUsername}&date=${today}`)
           .then(res => setStatus(res.data.status || "OFF"))
           .catch(err => console.error("Error re-fetching status:", err));
       })
@@ -129,12 +113,16 @@ function BorderDashboard() {
       return;
     }
 
-    const { date, time, hour } = getISTDateTime();
+    const now = new Date();
+    const hour = now.getHours();
 
     if (hour >= 18) {
       alert("❌ Unable to update guest meal status after 6:00 PM. Try again after 12:00 AM.");
       return;
     }
+
+    const date = now.toISOString().split('T')[0];
+    const time = now.toTimeString().split(' ')[0];
 
     axios.post('http://localhost:5000/api/guest-meal', {
       username: currentUsername,
@@ -163,12 +151,16 @@ function BorderDashboard() {
       return;
     }
 
-    const { date, time, hour } = getISTDateTime();
+    const now = new Date();
+    const hour = now.getHours();
 
     if (hour >= 18) {
       alert("❌ Unable to update guest meal status after 6:00 PM. Try again after 12:00 AM.");
       return;
     }
+
+    const date = now.toISOString().split('T')[0];
+    const time = now.toTimeString().split(' ')[0];
 
     try {
       await axios.post('http://localhost:5000/api/guest-meal', {
@@ -192,152 +184,163 @@ function BorderDashboard() {
   };
 
   return (
-    <div className="border-dashboard">
-      <div className="dashboard-container">
-        <h2 className="welcome">👋 Welcome, {userInfo.name || currentUsername}</h2>
-
-        {/* Today's Meal Status */}
-        <div className="status-card">
-          <p>
-            Today's Meal Status:{" "}
-            {status === null ? (
-              <span className="status loading">Loading...</span>
-            ) : (
-              <span className={`status ${status === 'ON' ? 'on' : 'off'}`}>{status}</span>
+  
+      <div className="border-dashboard">
+        <div className="dashboard-container">
+          <h2 className="welcome">👋 Welcome, {userInfo.name || currentUsername}</h2>
+    
+          {/* Today's Meal Status */}
+          <div className="status-card">
+            <p>
+              Today's Meal Status:{" "}
+              {status === null ? (
+                <span className="status loading">Loading...</span>
+              ) : (
+                <span className={`status ${status === 'ON' ? 'on' : 'off'}`}>{status}</span>
+              )}
+            </p>
+            <button className="toggle-button" onClick={handleToggle}>
+              Toggle Meal
+            </button>
+            {showUpdateError && (
+              <p className="update-message">{updateMessage}</p>
             )}
-          </p>
-          <button className="toggle-button" onClick={handleToggle} disabled={getISTDateTime().hour >= 18}>
-            Toggle Meal
-          </button>
+          </div>
+    
+          {/* Add Guest and set Meal Section on same line*/}
+               <div className="guest-button-row">
+                <button className="add-guest-btn" onClick={() => setShowGuestForm(true)}>➕ Add Guest Meal</button>
+                <button className="set-guest-btn" onClick={() => setShowSetGuestStatusForm(true)}>🍽️ Set Guest Meal</button>
+               </div>
 
-          {showUpdateError && (
-            <p className="update-message">{updateMessage}</p>
-          )}
-        </div>
-
-        {/* Add Guest and Set Guest Buttons */}
-        <div className="guest-button-row">
-          <button className="add-guest-btn" onClick={() => setShowGuestForm(true)}>➕ Add Guest Meal</button>
-          <button className="set-guest-btn" onClick={() => setShowSetGuestStatusForm(true)}>🍽️ Set Guest Meal</button>
-        </div>
-
-        {/* Add Guest Meal Popup */}
-        {showGuestForm && (
-          <div className="guest-modal-overlay" onClick={() => setShowGuestForm(false)}>
-            <div className="guest-modal-container" onClick={(e) => e.stopPropagation()}>
-              <h4>🍽️ Add Guest Meal</h4>
-              <label>Guest Name:</label>
-              <input
-                type="text"
-                value={guestName}
-                onChange={(e) => setGuestName(e.target.value)}
-                placeholder="Enter guest name"
-                className="guest-name-input"
-              />
-              <label>Meal Status:</label>
-              <select value={guestStatus} onChange={(e) => setGuestStatus(e.target.value)}>
-                <option value="ON">ON</option>
-                <option value="OFF">OFF</option>
-              </select>
-              <div className="guest-form-buttons">
-                <button onClick={handleGuestMealSubmit}>Submit</button>
-                <button className="cancel-btn" onClick={() => setShowGuestForm(false)}>Cancel</button>
+    
+          {/* Add Guest Meal Popup */}
+          {showGuestForm && (
+            <div className="guest-modal-overlay" onClick={() => setShowGuestForm(false)}>
+              <div className="guest-modal-container" onClick={(e) => e.stopPropagation()}>
+                <h4>🍽️ Add Guest Meal</h4>
+                <label>Guest Name:</label>
+                <input
+                  type="text"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.target.value)}
+                  placeholder="Enter guest name"
+                  className="guest-name-input"
+                />
+                <label>Meal Status:</label>
+                <select
+                  value={guestStatus}
+                  onChange={(e) => setGuestStatus(e.target.value)}
+                >
+                  <option value="ON">ON</option>
+                  <option value="OFF">OFF</option>
+                </select>
+                <div className="guest-form-buttons">
+                  <button onClick={handleGuestMealSubmit}>Submit</button>
+                  <button className="cancel-btn" onClick={() => setShowGuestForm(false)}>Cancel</button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Set Guest Meal Status Popup */}
-        {showSetGuestStatusForm && (
-          <div className="guest-modal-overlay" onClick={() => setShowSetGuestStatusForm(false)}>
-            <div className="guest-modal-container" onClick={(e) => e.stopPropagation()}>
-              <h3>🍽️ Set Guest Meal Status</h3>
-              <form onSubmit={handleGuestStatusUpdate}>
-                <div className="form-group">
-                  <label>Guest Name:</label>
-                  <select
-                    value={selectedGuest}
-                    onChange={(e) => setSelectedGuest(e.target.value)}
-                    required
-                  >
-                    <option value="">-- Select Guest --</option>
-                    {[...new Set(guestHistory.map(guest => guest.guest_name))].map((name, idx) => (
-                      <option key={idx} value={name}>{name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Status:</label>
-                  <select
-                    value={selectedStatus}
-                    onChange={(e) => setSelectedStatus(e.target.value)}
-                    required
-                  >
-                    <option value="ON">ON</option>
-                    <option value="OFF">OFF</option>
-                  </select>
-                </div>
-                <div className="guest-form-buttons">
-                  <button type="submit">Set Status</button>
-                  <button className="cancel-btn" onClick={() => setShowSetGuestStatusForm(false)}>Cancel</button>
-                </div>
-              </form>
+          )}
+    
+    
+          {/* Set Guest Meal Status Popup */}
+          {showSetGuestStatusForm && (
+            <div className="guest-modal-overlay" onClick={() => setShowSetGuestStatusForm(false)}>
+              <div className="guest-modal-container" onClick={(e) => e.stopPropagation()}>
+                <h3>🍽️ Set Guest Meal Status</h3>
+                <form onSubmit={handleGuestStatusUpdate}>
+                  <div className="form-group">
+                    <label>Guest Name:</label>
+                    <select
+                      value={selectedGuest}
+                      onChange={(e) => setSelectedGuest(e.target.value)}
+                      required
+                    >
+                      <option value="">-- Select Guest --</option>
+                      {[...new Set(guestHistory.map(guest => guest.guest_name))].map((name, idx) => (
+                        <option key={idx} value={name}>
+                          {name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+    
+                  <div className="form-group">
+                    <label>Status:</label>
+                    <select
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
+                      required
+                    >
+                      <option value="ON">ON</option>
+                      <option value="OFF">OFF</option>
+                    </select>
+                  </div>
+    
+                  <div className="guest-form-buttons">
+                    <button type="submit">Set Status</button>
+                    <button className="cancel-btn" onClick={() => setShowSetGuestStatusForm(false)}>Cancel</button>
+                  </div>
+                </form>
+              </div>
             </div>
+          )}
+    
+          {/* Your Info Section */}
+          <div className="edit-card">
+            <h3>📝 Your Info</h3>
+            <div className="info-grid">
+              <div><label>Name:</label><input type="text" value={userInfo.name} readOnly /></div>
+              <div><label>Address:</label><input type="text" value={userInfo.address} readOnly /></div>
+              <div><label>Phone:</label><input type="text" value={userInfo.phone} readOnly /></div>
+              <div><label>Room:</label><input type="text" value={userInfo.room} readOnly /></div>
+              <div><label>Username:</label><input type="text" value={userInfo.username} readOnly /></div>
+            </div>
+            <button className="update-button" onClick={() => navigate('/edit-info')}>
+              Edit Info
+            </button>
           </div>
-        )}
 
-        {/* Your Info Section */}
-        <div className="edit-card">
-          <h3>📝 Your Info</h3>
-          <div className="info-grid">
-            <div><label>Name:</label><input type="text" value={userInfo.name} readOnly /></div>
-            <div><label>Address:</label><input type="text" value={userInfo.address} readOnly /></div>
-            <div><label>Phone:</label><input type="text" value={userInfo.phone} readOnly /></div>
-            <div><label>Room:</label><input type="text" value={userInfo.room} readOnly /></div>
-            <div><label>Username:</label><input type="text" value={userInfo.username} readOnly /></div>
+
+          {/* Border Meal History */}
+          <div className="history-card">
+            <h3>📖 Meal History</h3>
+            <ul className="history-list">
+              {history.length > 0 ? history.map((entry, index) => (
+                <li key={index} className="history-item">
+                  <span>{entry.date} <small style={{ color: '#777' }}>{entry.time}</small></span>
+                  <span className={`status ${entry.status === 'ON' ? 'on' : 'off'}`}>
+                    {entry.status}
+                  </span>
+                </li>
+              )) : <p>No history found.</p>}
+            </ul>
           </div>
-          <button className="update-button" onClick={() => navigate('/edit-info')}>
-            Edit Info
-          </button>
+    
+          {/* Guest Meal History */}
+          <div className="guest-history-card">
+            <h3>🧑‍🤝‍🧑 Guest Meal History</h3>
+            <ul className="history-list">
+              {guestHistory.length > 0 ? guestHistory.map((entry, index) => (
+                <li key={index} className="history-item">
+                  <div>
+                    <strong>{entry.guest_name || 'Unnamed Guest'}</strong><br />
+                    <small>{entry.date} <span style={{ color: '#777' }}>{entry.time}</span></small>
+                  </div>
+                  <span className={`status ${entry.status === 'ON' ? 'on' : 'off'}`}>
+                    {entry.status}
+                  </span>
+                </li>
+              )) : <p>No guest history found.</p>}
+            </ul>
+          </div>
+    
+          
         </div>
-
-        {/* Meal History */}
-        <div className="history-card">
-          <h3>📖 Meal History</h3>
-          <ul className="history-list">
-            {history.length > 0 ? history.map((entry, index) => (
-              <li key={index} className="history-item">
-                <span>{entry.date} <small style={{ color: '#777' }}>{entry.time}</small></span>
-                <span className={`status ${entry.status === 'ON' ? 'on' : 'off'}`}>
-                  {entry.status}
-                </span>
-              </li>
-            )) : (
-              <li className="history-item">No meal history found.</li>
-            )}
-          </ul>
-        </div>
-        {/* Guest Meal History */}
-<div className="guest-history-card">
-<h3>🧑‍🤝‍🧑 Guest Meal History</h3>
-<ul className="history-list">
-  {guestHistory.length > 0 ? guestHistory.map((entry, index) => (
-    <li key={index} className="history-item">
-      <div>
-        <strong>{entry.guest_name || 'Unnamed Guest'}</strong><br />
-        <small>{entry.date} <span style={{ color: '#777' }}>{entry.time}</span></small>
       </div>
-      <span className={`status ${entry.status === 'ON' ? 'on' : 'off'}`}>
-        {entry.status}
-      </span>
-    </li>
-  )) : <p>No guest history found.</p>}
-</ul>
-</div>
-
-      </div>
-    </div>
-  );
+    );
+    
 }
 
 export default BorderDashboard;

@@ -2,8 +2,6 @@ const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 
-const moment = require('moment-timezone');
-
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -61,8 +59,8 @@ app.post('/api/meal', async (req, res) => {
     }
 
     const userId = userRows[0].id;
-    const time = moment().tz('Asia/Kolkata').format('HH:mm:ss');
-
+    const now = new Date();
+    const time = now.toTimeString().split(' ')[0];
 
     const [existingRows] = await db.promise().query(
       'SELECT * FROM meal_status WHERE user_id = ? AND date = ?',
@@ -103,9 +101,8 @@ app.get('/api/meal-status', (req, res) => {
     if (results.length === 0) return res.status(400).json({ message: 'User not found' });
 
     const userId = results[0].id;
-    const now = moment().tz('Asia/Kolkata');
-    const isAfter6PM = now.hour() >= 18;
-
+    const now = new Date();
+    const isAfter6PM = now.getHours() >= 18;
 
     const queryParams = [userId, date];
     const timeCondition = isAfter6PM ? `AND TIME(time) <= '18:00:00'` : '';
@@ -295,11 +292,10 @@ app.post('/api/guest-meal', async (req, res) => {
 
   try {
     // Restrict updates after 6 PM
-    const currentHourIST = moment().tz('Asia/Kolkata').hour();
-    if (currentHourIST >= 18) {
-  return res.status(403).json({ message: 'Guest meal status cannot be updated after 6:00 PM. Try again after midnight.' });
-    } 
-
+    const [hour, minute, second] = time.split(':').map(Number);
+    if (hour >= 18) {
+      return res.status(403).json({ message: 'Guest meal status cannot be updated after 6:00 PM. Try again after midnight.' });
+    }
 
     // Get the user_id of the border
     const [userRows] = await db.promise().query(
@@ -329,7 +325,7 @@ app.post('/api/guest-meal', async (req, res) => {
       // Insert new guest meal entry
       await db.promise().query(
         'INSERT INTO guest_meals (user_id, guest_name, status, date, time) VALUES (?, ?, ?, ?, ?)',
-        [userId, guest_name, status, date, time]
+        [userId, guest_name, status, CURRENT_DATE, time]
       );
     }
 
@@ -343,44 +339,40 @@ app.post('/api/guest-meal', async (req, res) => {
 
 
 
-/// Guest meal history
+
+//guest meal history
 app.get('/api/guest-meal-history', async (req, res) => {
   const { username } = req.query;
 
   try {
-    const [userResult] = await db.promise().query(
-      'SELECT id FROM users WHERE username = ?', 
-      [username]
-    );
+    const [userResult] = await db.promise().query('SELECT id FROM users WHERE username = ?', [username]);
 
     if (userResult.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ error: 'User not found' });
     }
 
-    const userId = userResult[0].id;
+    const user_id = userResult[0].id;
 
-    const [guestMeals] = await db.promise().query(
-      `SELECT 
-         guest_name, 
-         DATE_FORMAT(date, '%Y-%m-%d') AS date,
-         TIME_FORMAT(time, '%r') AS time,  -- AM/PM format
-         status
-       FROM guest_meals 
-       WHERE user_id = ?
-       ORDER BY date DESC, time DESC
-       LIMIT 30
-      `,
-      [userId]
-    );
+    const [history] = await db.promise().query(
+        `SELECT 
+           guest_name, 
+           status, 
+           DATE_FORMAT(date, '%Y-%m-%d') AS date, 
+           DATE_FORMAT(time, '%r') AS time
+         FROM guest_meals 
+         WHERE user_id = ? 
+         ORDER BY date DESC, time DESC`,
+        [user_id]
+      );
+      
 
-    res.json(guestMeals);
+    res.status(200).json(history);
 
   } catch (err) {
-    console.error("Error fetching guest meal history:", err);
-    res.status(500).json({ message: 'Server error while fetching guest meal history' });
+    console.error('Error fetching guest meal history:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 // Admin: Get all guest meals with border name
 app.get('/api/admin/guest-meal-status', async (req, res) => {
