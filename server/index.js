@@ -331,7 +331,7 @@ app.post('/api/guest-meal', async (req, res) => {
       // Insert new guest meal entry
       await db.promise().query(
         'INSERT INTO guest_meals (user_id, guest_name, status, date, time) VALUES (?, ?, ?, ?, ?)',
-        [userId, guest_name, status, date, time]  // ✅ FIXED: Use `date` from req.body
+        [userId, guest_name, status, date, time]  // ✅ FIXED: Use date from req.body
       );
     }
 
@@ -475,6 +475,7 @@ app.get('/api/admin/monthly-guest-meals-summary', async (req, res) => {
         SUM(
           CASE 
             WHEN TIME(gm.time) < '06:00:00' THEN 2 
+            WHEN (TIME(gm.time) <= '06:00:00' AND gm.status = 'ON' AND TIME(gm.time) > '06:00:00' AND gm.status = 'OFF') THEN 1
             ELSE 1 
           END
         ) AS total_guest_meals

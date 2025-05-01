@@ -226,6 +226,8 @@ const AdminDashboard = () => {
                 <th>Boarder Name</th>
                 <th>Room</th>
                 <th>Guest Name</th>
+                <th>Date</th>
+                <th>Time</th>
                 <th>Status</th>
               </tr>
             </thead>
@@ -235,6 +237,8 @@ const AdminDashboard = () => {
                   <td>{guest.border_name}</td>
                   <td>{guest.room}</td>
                   <td>{guest.guest_name}</td>
+                  <td>{new Date(guest.date).toLocaleDateString('en-GB')}</td>
+                  <td>{guest.time || 'N/A'}</td>
                   <td className={guest.status === 'ON' ? 'on' : 'off'}>
                     {guest.status}
                   </td>
