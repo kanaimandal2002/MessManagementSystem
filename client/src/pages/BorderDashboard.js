@@ -34,7 +34,7 @@ function BorderDashboard() {
   const [guestHistory, setGuestHistory] = useState([]);
 
   const today = new Date().toISOString().split('T')[0];
-
+  
   useEffect(() => {
     if (!currentUsername) {
       navigate('/login');
@@ -306,6 +306,28 @@ const handleGuestStatusUpdate = async (e) => {
               </div>
             </div>
           )}
+
+          {/* Today's Guest Meal Status */}
+<div className="status-card">
+  <h3>👥 Today's Guest Meals</h3>
+  {guestHistory.filter(g => g.date === today).length === 0 ? (
+    <p>No guest meals added for today.</p>
+  ) : (
+    <ul className="guest-list">
+      {guestHistory
+        .filter(g => g.date === today)
+        .map((guest, idx) => (
+          <li key={idx}>
+            <strong>{guest.guest_name}</strong>:{" "}
+            <span className={guest.status === 'ON' ? 'on' : 'off'}>
+              {guest.status}
+            </span>
+          </li>
+        ))}
+    </ul>
+  )}
+</div>
+
     
           {/* Your Info Section */}
           <div className="edit-card">
