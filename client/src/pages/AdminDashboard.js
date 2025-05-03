@@ -14,9 +14,10 @@ const AdminDashboard = () => {
   const [guestMealCount, setGuestMealCount] = useState(0);
   const [monthlyGuestMealsData, setMonthlyGuestMealsData] = useState([]);
   const [showGuestTable, setShowGuestTable] = useState(false);
-  const [guestMealSummary, setGuestMealSummary] = useState([]);
-  const [showGuestSummary, setShowGuestSummary] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState('');
+
+  const [monthlyGuestMealSummary, setMonthlyGuestMealSummary] = useState([]);
+  const [showMonthlyGuestSummary, setShowMonthlyGuestSummary] = useState(false);
 
   useEffect(() => {
     fetchBorderStatus();
@@ -68,6 +69,7 @@ const AdminDashboard = () => {
       });
       setMonthlyGuestMealsData(res.data);
       setShowGuestTable(true);
+      fetchMonthlyGuestMealSummary(month); // fetch summary also
     } catch (err) {
       console.error('Error fetching monthly guest meal data:', err);
       setMonthlyGuestMealsData([]);
@@ -75,19 +77,27 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchMonthlyGuestMealSummary = async () => {
-    if (showGuestSummary) {
-      setShowGuestSummary(false);
-      return;
-    }
+  const fetchMonthlyGuestMealSummary = async (month) => {
+    if (!month) return;
+  
+    // Split '2025-04' into year and month
+    const [year, monthNumber] = month.split('-'); // '2025-04' → ['2025', '04']
+  
     try {
-      const res = await axios.get('http://localhost:5000/api/admin/monthly-guest-meals-summary');
-      setGuestMealSummary(res.data);
-      setShowGuestSummary(true);
+      const res = await axios.get('http://localhost:5000/api/admin/monthly-guest-meals-summary', {
+        params: { month: parseInt(monthNumber, 10), year: parseInt(year, 10) }
+      });
+      setMonthlyGuestMealSummary(res.data);
+      setShowMonthlyGuestSummary(true);
     } catch (err) {
-      console.error('Error fetching guest meal summary:', err);
+      console.error('Error fetching monthly guest meal summary:', err);
+      setMonthlyGuestMealSummary([]);
+      setShowMonthlyGuestSummary(false);
     }
   };
+  
+
+  // Removed unused fetchMonthlyGuestMealSummaryDefault function
 
   const handleMonthChange = (e) => {
     const selected = e.target.value;
@@ -135,12 +145,12 @@ const AdminDashboard = () => {
 
       <div className="total-meals-card">
         <h3>🍽️ Total Meals Today</h3>
-        <p><strong>{totalMeals}</strong> meals taken</p>
+        <p><strong>{totalMeals}</strong> meals</p>
         <p className="snapshot-label">(Live Meal Status)</p>
       </div>
 
       <div className="total-meals-card" style={{ backgroundColor: '#fff7e6' }}>
-        <h3>🧑‍🍳 Today's Guest Meals (ON)</h3>
+        <h4>🧑‍🍳 Today's Guest Meals (ON)</h4>
         <p><strong>{guestMealCount}</strong> guest meals</p>
         <p className="snapshot-label">(Currently ON)</p>
       </div>
@@ -159,7 +169,6 @@ const AdminDashboard = () => {
           }}
         />
       </div>
-      
 
       <h3>🏠 All Boarders' Meal Status</h3>
 
@@ -249,39 +258,8 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Monthly Summary Button */}
-      <div style={{ margin: '1rem 0' }}>
-        <button onClick={fetchMonthlyGuestMealSummary}>
-          📊 {showGuestSummary ? 'Hide' : 'Show'} This Month's Guest Meals Summary
-        </button>
-      </div>
+    
 
-      {/* Summary Table */}
-      {showGuestSummary && (
-        <div className="table-container">
-          <h3>📆 This Month Guest Meals Summary</h3>
-          <table className="borders-table">
-            <thead>
-              <tr>
-                <th>Border Name</th>
-                <th>Room</th>
-                <th>Total Guest Meals</th>
-              </tr>
-            </thead>
-            <tbody>
-              {guestMealSummary.map((item, index) => (
-                <tr key={index}>
-                  <td>{item.name}</td>
-                  <td>{item.room}</td>
-                  <td>{item.total_guest_meals}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Month Picker */}
       <div style={{ margin: '1rem 0' }}>
         <label htmlFor="monthPicker">📅 Select Month for Records:&nbsp;</label>
         <input
@@ -293,7 +271,6 @@ const AdminDashboard = () => {
         />
       </div>
 
-      {/* Monthly Guest Meal Records */}
       {showGuestTable && (
         <div>
           <h3>🧑‍🤝‍🧑 Monthly Guest Meal Records (Status = ON)</h3>
@@ -321,6 +298,38 @@ const AdminDashboard = () => {
                       <td>{record.guest_name}</td>
                       <td>{new Date(record.date).toLocaleDateString('en-GB')}</td>
                       <td>{record.time || 'N/A'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {showMonthlyGuestSummary && (
+        <div>
+          <h3>📊 Guest Meal Summary for {selectedMonth}</h3>
+          {monthlyGuestMealsData.length === 0 ? (
+            <p style={{ marginTop: '10px', fontStyle: 'italic', color: '#777' }}>
+              No guest meals summary for the selected month
+            </p>
+          ) : (
+            <div className="table-container">
+              <table className="borders-table">
+                <thead>
+                  <tr>
+                    <th>Border Name</th>
+                    <th>Room</th>
+                    <th>Total Guest Meals</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monthlyGuestMealSummary.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.name}</td>
+                      <td>{item.room}</td>
+                      <td>{item.total_guest_meals}</td>
                     </tr>
                   ))}
                 </tbody>

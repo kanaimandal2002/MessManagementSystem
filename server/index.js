@@ -466,6 +466,12 @@ app.get('/api/admin/monthly-guest-meals', async (req, res) => {
 
 // Route: GET /api/admin/monthly-guest-meals-count each border
 app.get('/api/admin/monthly-guest-meals-summary', async (req, res) => {
+  const { month, year } = req.query;
+
+  if (!month || !year) {
+    return res.status(400).json({ message: 'Missing month or year parameter' });
+  }
+
   try {
     const [rows] = await db.promise().query(`
       SELECT 
@@ -482,10 +488,10 @@ app.get('/api/admin/monthly-guest-meals-summary', async (req, res) => {
       FROM guest_meals gm
       JOIN users u ON gm.user_id = u.id
       WHERE gm.status = 'ON'
-        AND MONTH(gm.date) = MONTH(CURDATE())
-        AND YEAR(gm.date) = YEAR(CURDATE())
+        AND MONTH(gm.date) = ?
+        AND YEAR(gm.date) = ?
       GROUP BY gm.user_id
-    `);
+    `, [month, year]);
 
     res.json(rows);
   } catch (err) {
@@ -493,6 +499,7 @@ app.get('/api/admin/monthly-guest-meals-summary', async (req, res) => {
     res.status(500).json({ message: 'Server error fetching summary' });
   }
 });
+
 
 
 
