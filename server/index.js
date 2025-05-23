@@ -22,6 +22,13 @@ db.connect((err) => {
   }
 });
 
+// Helper to get current date in YYYY-MM-DD
+function getCurrentDateString() {
+  const now = new Date();
+  const localDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Kolkata" }));
+  return localDate.toISOString().split("T")[0]; // "YYYY-MM-DD"
+}
+
 // ======== ROUTES ========
 
 // Login
