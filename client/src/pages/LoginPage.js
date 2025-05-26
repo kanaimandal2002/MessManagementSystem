@@ -17,10 +17,8 @@ function LoginPage() {
         password,
       });
 
-      // ✅ Save username in localStorage
       localStorage.setItem('username', res.data.username);
 
-      // ✅ Navigate based on role
       if (res.data.role === 'admin') {
         navigate('/admin');
       } else if (res.data.role === 'border') {
@@ -32,6 +30,10 @@ function LoginPage() {
       console.error('Login error:', err);
       setError('Invalid username or password');
     }
+  };
+
+  const handleCancel = () => {
+    navigate('/'); // 👈 Takes back to IndexPage
   };
 
   return (
@@ -60,8 +62,13 @@ function LoginPage() {
               required
             />
           </div>
-          <div className="d-grid">
+
+          {/* Button group: Login and Cancel */}
+          <div className="d-flex justify-content-between">
             <button type="submit" className="btn btn-primary">Login</button>
+            <button type="button" className="btn btn-secondary" onClick={handleCancel}>
+              Cancel
+            </button>
           </div>
         </form>
       </div>
