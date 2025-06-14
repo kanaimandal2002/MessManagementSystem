@@ -74,5 +74,5 @@ A web-based application to efficiently manage hostel mess operations including m
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/mess-management-system.git
-cd mess-management-system
+git clone https://github.com/kanaimandal2002/MessManagementSystem.git
+cd MessManagementSystem
