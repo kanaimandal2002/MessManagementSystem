@@ -35,9 +35,6 @@ A web-based application to efficiently manage hostel mess operations including m
 | Backend     | Node.js + Express.js |
 | Database    | MySQL      |
 | Styling     | CSS        |
-| API Calls   | Axios      |
-| Date Utils  | JavaScript Date APIs |
-| Dev Tools   | Nodemon, MySQL2, CORS |
 
 ---
 
