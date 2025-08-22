@@ -1,6 +1,6 @@
 # 🍽️ Mess Management System
 
-A web-based application to efficiently manage hostel mess operations including meal status tracking, guest meal handling, and admin reports. Built with a modern tech stack: **React.js**, **Node.js**, **MySQL**, and **Express.js**.
+A web-based application to efficiently manage hostel mess operations including meal status tracking, guest meal handling, and admin reports. Built with a modern tech stack: **React.js**, **Node.js** and **MySQL**.
 
 ---
 
